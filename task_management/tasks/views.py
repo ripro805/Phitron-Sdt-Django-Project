@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from .forms import TaskForm, TaskModelForm
-from tasks.models import Employee, Task,TaskDetail
+from tasks.models import Employee, Task,TaskDetail, Project
 from datetime import date
+from django.db.models import Q
 
 # Create your views here.
 def manager_dashboard(request):
@@ -38,11 +39,9 @@ def create_task(request):
     return render(request, 'task_form.html', context)
 
 def view_tasks(request):
-    #show the tasks with status pending
-    # tasks=Task.objects.filter(status='PENDING')
-    #show the tasks which due_date is today
-   
-    #show the task which priority is not high
-    tasks=TaskDetail.objects.exclude(priority='H')
-
+    #Select related query(Foreign Key,One to One)
+    #tasks=TaskDetail.objects.select_related('task').all()
+    #tasks=Task.objects.select_related('project').all()
+    """ prefetch_related query(Many to Many,Reverse Foreign Key)"""
+    tasks=Project.objects.prefetch_related('task_set').all()
     return render(request,'show_tasks.html',{"tasks":tasks})

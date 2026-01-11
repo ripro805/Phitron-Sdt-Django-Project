@@ -8,9 +8,14 @@
 <body>
     <div>
         <ul>
-            {% for task in tasks %}
-            <li>{{task.task}}</li>
-              <li>{{task.priority}}</li>
+            {% for project in tasks %}
+            <li>
+                <p>{{project.name}}</p>
+               {% for task in project.task_set.all %}
+                <p>{{task.title}}</p>
+                {% endfor %}
+            </li>
+             
 
             {% endfor %}
         </ul>
