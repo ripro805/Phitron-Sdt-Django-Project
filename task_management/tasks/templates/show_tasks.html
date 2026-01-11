@@ -8,16 +8,14 @@
 <body>
     <div>
         <ul>
-            {% for project in tasks %}
+            {% for project in projects %}
             <li>
-                <p>{{project.name}}</p>
-               {% for task in project.task_set.all %}
-                <p>{{task.title}}</p>
+                {{ project.name }} - {{ project.num_task }}
                 {% endfor %}
             </li>
-             
+             </ul>
 
-            {% endfor %}
+          
         </ul>
   
     </div>

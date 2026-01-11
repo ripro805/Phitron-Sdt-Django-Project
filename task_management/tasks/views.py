@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from .forms import TaskForm, TaskModelForm
 from tasks.models import Employee, Task,TaskDetail, Project
 from datetime import date
-from django.db.models import Q
+from django.db.models import Q, Count
 
 # Create your views here.
 def manager_dashboard(request):
@@ -39,9 +39,6 @@ def create_task(request):
     return render(request, 'task_form.html', context)
 
 def view_tasks(request):
-    #Select related query(Foreign Key,One to One)
-    #tasks=TaskDetail.objects.select_related('task').all()
-    #tasks=Task.objects.select_related('project').all()
-    """ prefetch_related query(Many to Many,Reverse Foreign Key)"""
-    tasks=Project.objects.prefetch_related('task_set').all()
-    return render(request,'show_tasks.html',{"tasks":tasks})
+   #task_count=Task.objects.aggregate(total=Count('id'))['total']
+   projects=Project.objects.annotate(num_task=Count('task')).order_by('num_task')
+   return render(request,'show_tasks.html',{"projects":projects})
