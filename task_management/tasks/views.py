@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
-from .forms import TaskForm, TaskModelForm
+from .forms import TaskForm, TaskModelForm,TaskDetailModelForm
 from tasks.models import Employee, Task,TaskDetail, Project
 from datetime import date
 from django.db.models import Q, Count
+from django.contrib import messages
 
 # Create your views here.
 def manager_dashboard(request):
@@ -51,18 +52,22 @@ def test(request):
 
 def create_task(request):
    # employees=Employee.objects.all()
-    form=TaskModelForm() #get request
+    task_form=TaskModelForm() #get request
+    task_detail_form=TaskDetailModelForm()
     if request.method=='POST':
-        form=TaskModelForm(request.POST)
-        if form.is_valid():
+        task_form=TaskModelForm(request.POST)
+        task_detail_form=TaskDetailModelForm(request.POST)
+        if task_form.is_valid() and task_detail_form.is_valid():
             # Process the form data
             #For Model Form
-            form.save()
-            return render(request, "task_form.html", {"form": form, "message": "Task Created Successfully"})
-       
-        return HttpResponse("Task Created Successfully")   
-    context={'form':form}
-    return render(request, 'task_form.html', context)
+            task=task_form.save()
+            task_detail=task_detail_form.save(commit=False)
+            task_detail.task = task
+            task_detail.save()
+            
+            messages.success(request, 'Task created successfully!')
+            return redirect('create-task')  # Redirect after successful submission  
+    return render(request,'task_form.html',{'task_form':task_form,'task_detail_form':task_detail_form})
 
 def view_tasks(request):
    #task_count=Task.objects.aggregate(total=Count('id'))['total']
