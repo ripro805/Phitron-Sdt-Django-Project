@@ -3,12 +3,13 @@
  {% block tasks %}
  <!-- Task Table -->
         <div class="bg-white rounded-xl shadow-sm ">
-            <div class="grid grid-cols-5 p-4 border-b border-gray-100 text-sm text-gray-500">
+            <div class="grid grid-cols-6 p-4 border-b border-gray-100 text-sm text-gray-500">
                 <div>Task Title</div>
                 <div>Status</div>
                 <div>Priority</div>
                 <div>Team</div>
                 <div>Created At</div>
+                <div>Actions</div>
             </div>
             <!-- Task Item Row 1 -->
 
@@ -16,7 +17,7 @@
                 <!-- Task Item Row 1 -->
                {% for task in tasks %}
           
-                 <div class="grid grid-cols-5 items-center py-4 px-6">
+                 <div class="grid grid-cols-6 items-center py-4 px-6">
                     <div class="flex items-center">
                         <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
                         <span class="text-sm text-gray-900">{{ task.title }}</span>
@@ -39,6 +40,11 @@
                       {% endfor %}
                     </div>
                     <div class="text-sm text-gray-500">{{ task.created_at|timesince }}</div>
+                    <div>
+                        <a href="{% url 'update-task' task.id %}" class="px-3 py-1 bg-green-500 hover:bg-green-950 text-white text-sm rounded-md">
+                            Edit
+                        </a>
+                    </div>
                 </div>
           
                {% endfor %}

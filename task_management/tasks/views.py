@@ -69,6 +69,28 @@ def create_task(request):
             return redirect('create-task')  # Redirect after successful submission  
     return render(request,'task_form.html',{'task_form':task_form,'task_detail_form':task_detail_form})
 
+def update_task(request,id):
+   # employees=Employee.objects.all()
+    task=Task.objects.get(id=id)
+    task_form=TaskModelForm(instance=task) #get request
+    task_detail_form=None
+    if task.detail:
+      task_detail_form=TaskDetailModelForm(instance=task.detail)
+    if request.method=='POST':
+        task_form=TaskModelForm(request.POST,instance=task)
+        task_detail_form=TaskDetailModelForm(request.POST, instance=task.detail)
+        if task_form.is_valid() and task_detail_form.is_valid():
+            # Process the form data
+            #For Model Form
+            task=task_form.save()
+            task_detail=task_detail_form.save(commit=False)
+            task_detail.task = task
+            task_detail.save()
+            
+            messages.success(request, 'Task updated successfully!')
+            return redirect('manager-dashboard')  # Redirect after successful submission  
+    return render(request,'task_form.html',{'task_form':task_form,'task_detail_form':task_detail_form})
+
 def view_tasks(request):
    #task_count=Task.objects.aggregate(total=Count('id'))['total']
    projects=Project.objects.annotate(num_task=Count('task')).order_by('num_task')
