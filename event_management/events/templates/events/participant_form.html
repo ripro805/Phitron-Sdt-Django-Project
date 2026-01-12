@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if form.instance.pk %}Edit Participant{% else %}Create Participant{% endif %} - Event Management</title>
+    <link href="{% static 'css/output.css' %}" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex space-x-8">
+                    <a href="{% url 'events:home' %}" class="inline-flex items-center px-1 pt-1 text-gray-700 hover:text-blue-600 transition-colors">
+                        Home
+                    </a>
+                    <a href="{% url 'events:category_list' %}" class="inline-flex items-center px-1 pt-1 text-gray-700 hover:text-blue-600 transition-colors">
+                        Categories
+                    </a>
+                    <a href="{% url 'events:event_list' %}" class="inline-flex items-center px-1 pt-1 text-gray-700 hover:text-blue-600 transition-colors">
+                        Events
+                    </a>
+                    <a href="{% url 'events:participant_list' %}" class="inline-flex items-center px-1 pt-1 text-blue-600 border-b-2 border-blue-600 font-medium">
+                        Participants
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Breadcrumb -->
+        <div class="mb-6">
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="{% url 'events:home' %}" class="text-gray-600 hover:text-blue-600">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                            </svg>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <a href="{% url 'events:participant_list' %}" class="ml-1 text-gray-600 hover:text-blue-600 md:ml-2">Participants</a>
+                        </div>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="ml-1 text-gray-500 md:ml-2">{% if form.instance.pk %}Edit{% else %}Create{% endif %}</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
+                <h1 class="text-2xl font-bold text-white flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    {% if form.instance.pk %}Edit Participant{% else %}Register New Participant{% endif %}
+                </h1>
+            </div>
+
+            <!-- Form -->
+            <form method="post" class="px-6 py-6">
+                {% csrf_token %}
+                
+                <!-- Non-field Errors -->
+                {% if form.non_field_errors %}
+                    <div class="mb-6 p-4 bg-red-100 border border-red-200 rounded-lg">
+                        <ul class="text-red-800 text-sm list-disc list-inside">
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Participant Name -->
+                <div class="mb-6">
+                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Full Name <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="{{ form.name.name }}" 
+                        id="{{ form.name.id_for_label }}"
+                        value="{{ form.name.value|default:'' }}"
+                        class="w-full px-4 py-2 border {% if form.name.errors %}border-red-500{% else %}border-gray-300{% endif %} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                        placeholder="Enter participant's full name"
+                        {% if form.name.field.required %}required{% endif %}
+                    >
+                    {% if form.name.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                    {% endif %}
+                    {% if form.name.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.name.help_text }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="mb-6">
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Email Address <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="email" 
+                        name="{{ form.email.name }}" 
+                        id="{{ form.email.id_for_label }}"
+                        value="{{ form.email.value|default:'' }}"
+                        class="w-full px-4 py-2 border {% if form.email.errors %}border-red-500{% else %}border-gray-300{% endif %} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                        placeholder="participant@example.com"
+                        {% if form.email.field.required %}required{% endif %}
+                    >
+                    {% if form.email.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                    {% if form.email.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.email.help_text }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Events (Multiple Select) -->
+                <div class="mb-6">
+                    <label for="{{ form.events.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Register for Events
+                    </label>
+                    <select 
+                        name="{{ form.events.name }}" 
+                        id="{{ form.events.id_for_label }}"
+                        multiple
+                        size="6"
+                        class="w-full px-4 py-2 border {% if form.events.errors %}border-red-500{% else %}border-gray-300{% endif %} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    >
+                        {% for value, label in form.events.field.choices %}
+                            {% if value %}
+                                <option value="{{ value }}" {% if value in form.events.value or value|stringformat:"s" in form.events.value %}selected{% endif %}>{{ label }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% if form.events.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.events.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Hold Ctrl (Windows) or Cmd (Mac) to select multiple events</p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex items-center justify-end space-x-3 pt-6 border-t">
+                    <a href="{% url 'events:participant_list' %}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        {% if form.instance.pk %}Update Participant{% else %}Register Participant{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
