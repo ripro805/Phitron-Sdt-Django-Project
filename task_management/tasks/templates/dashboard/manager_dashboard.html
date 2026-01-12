@@ -3,8 +3,9 @@
  {% block tasks %}
  <!-- Task Table -->
         <div class="bg-white rounded-xl shadow-sm ">
-            <div class="grid grid-cols-4 p-4 border-b border-gray-100 text-sm text-gray-500">
+            <div class="grid grid-cols-5 p-4 border-b border-gray-100 text-sm text-gray-500">
                 <div>Task Title</div>
+                <div>Status</div>
                 <div>Priority</div>
                 <div>Team</div>
                 <div>Created At</div>
@@ -15,10 +16,19 @@
                 <!-- Task Item Row 1 -->
                {% for task in tasks %}
           
-                 <div class="grid grid-cols-4 items-center py-4 px-6">
+                 <div class="grid grid-cols-5 items-center py-4 px-6">
                     <div class="flex items-center">
                         <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
                         <span class="text-sm text-gray-900">{{ task.title }}</span>
+                    </div>
+                    <div>
+                        {% if task.status == 'COMPLETED' %}
+                            <span class="px-3 py-1 rounded-full bg-green-50 text-green-600 text-sm">{{ task.get_status_display }}</span>
+                        {% elif task.status == 'IN_PROGRESS' %}
+                            <span class="px-3 py-1 rounded-full bg-yellow-50 text-yellow-600 text-sm">{{ task.get_status_display }}</span>
+                        {% else %}
+                            <span class="px-3 py-1 rounded-full bg-purple-50 text-purple-600 text-sm">{{ task.get_status_display }}</span>
+                        {% endif %}
                     </div>
                     <div>
                         <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm">{{ task.detail.get_priority_display }}</span>
@@ -26,10 +36,8 @@
                     <div class="flex -space-x-2">
                       {% for emp in task.assigned_to.all %}
                        <div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs">{{emp.name|slice:":2"}}</div>
-                      {% endfor %} 
-                
-                      </div>
-                       
+                      {% endfor %}
+                    </div>
                     <div class="text-sm text-gray-500">{{ task.created_at|timesince }}</div>
                 </div>
           

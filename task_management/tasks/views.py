@@ -7,26 +7,26 @@ from django.db.models import Q, Count
 
 # Create your views here.
 def manager_dashboard(request):
-    tasks=Task.objects.select_related('detail').prefetch_related('assigned_to').all()
-    #getting task count
-    # total_task=tasks.count()
-    # pending_task=tasks.filter(status='Pending').count()
-    # completed_task=tasks.filter(status='Completed').count()
-    # inprogress_task=tasks.filter(status='In Progress').count()
-    
-    # count=[
-    #     "total_task":,
-    #     "pending_task:",
-    #     "completed_task:",
-    #     "inprogress_task:"
-        
-    # ]
+    type=request.GET.get('type', 'all')    
+    # print("Type is:",type)
+   
+ 
     counts=Task.objects.aggregate(total=Count('id'),
                                  pending=Count('id', filter=Q(status='PENDING')),
                                  completed=Count('id', filter=Q(status='COMPLETED')),
                                  inprogress=Count('id', filter=Q(status='IN_PROGRESS'))
                                  
     )
+    #Retriving task data based on type
+    base_Query=Task.objects.select_related('detail').prefetch_related('assigned_to')
+    if type=='pending':
+        tasks=base_Query.filter(status='PENDING')
+    elif type=='completed':
+        tasks=base_Query.filter(status='COMPLETED')
+    elif type=='inprogress':
+        tasks=base_Query.filter(status='IN_PROGRESS')
+    elif type=='all':
+        tasks=base_Query.all()
     context={
         'tasks':tasks,  # Added tasks to context
         'counts':counts,
