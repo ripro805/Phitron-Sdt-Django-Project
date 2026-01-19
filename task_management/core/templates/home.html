@@ -9,6 +9,10 @@
     <h1>Welcome to the Home Page</h1>
     {% if user.is_authenticated %}
     {{ user.username }}
+    <form action="{% url 'sign_out' %}" method ='POST'>
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
     {% else %}
     Anonymous User
     {% endif %}
