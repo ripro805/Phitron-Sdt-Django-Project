@@ -3,18 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Welcome to the Home Page</h1>
-    {% if user.is_authenticated %}
-    {{ user.username }}
-    <form action="{% url 'sign_out' %}" method ='POST'>
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
-    {% else %}
-    Anonymous User
-    {% endif %}
+<body class="bg-gradient-to-br from-blue-100 to-purple-200 min-h-screen flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-lg p-10 w-full max-w-md text-center">
+        <h1 class="text-3xl font-bold mb-6 text-blue-700">Welcome to the Home Page</h1>
+        {% if user.is_authenticated %}
+            <div class="mb-4 text-lg text-gray-700">Hello, <span class="font-semibold">{{ user.username }}</span>!</div>
+            <form action="{% url 'sign_out' %}" method ='POST' class="mt-6">
+                {% csrf_token %}
+                <button type="submit" class="w-full py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition">Logout</button>
+            </form>
+        {% else %}
+            <div class="mb-4 text-lg text-gray-700">Anonymous User</div>
+            <a href="{% url 'sign_in' %}" class="inline-block mt-4 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition">Login</a>
+            <a href="/users/sign-up/" class="inline-block mt-4 ml-2 px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition">Register</a>
+        {% endif %}
+    </div>
 </body>
 </html>
