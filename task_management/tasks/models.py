@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save,post_delete
 from django.dispatch import receiver 
 class Employee(models.Model):
     name = models.CharField(max_length=100)
@@ -62,7 +62,6 @@ class Project(models.Model):
         return self.name
     
 #signals
-from django.db.models.signals import post_delete
 
 @receiver(pre_save, sender=Task)
 def notify_tasks_creation(sender, instance, **kwargs):
