@@ -1,6 +1,6 @@
 from django.db import models
-
-# Create your models here.
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver 
 class Employee(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -60,3 +60,16 @@ class Project(models.Model):
     
     def __str__(self):
         return self.name
+    
+#signals
+from django.db.models.signals import post_delete
+
+@receiver(pre_save, sender=Task)
+def notify_tasks_creation(sender, instance, **kwargs):
+    if instance._state.adding:  # Check if the instance is being created
+        print(f"New Task Created: {instance.title}")    
+        instance.is_completed =True
+
+@receiver(post_delete, sender=Task)
+def notify_task_deletion(sender, instance, **kwargs):
+    print(f"Task Deleted: {instance.title}")
