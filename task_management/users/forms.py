@@ -57,6 +57,7 @@ class CustomizeRegisterForm(StyledFormMixin, forms.ModelForm):
             raise forms.ValidationError("Password must contain at least one digit.")
         if not re.search(r'[@#$%^&+=]', password):
             raise forms.ValidationError("Password must contain at least one special character (@#$%^&+=).")
+        return password
 
     def clean(self):
         cleaned_data = super().clean()
@@ -64,6 +65,7 @@ class CustomizeRegisterForm(StyledFormMixin, forms.ModelForm):
         confirm_password = cleaned_data.get('confirm_password')
         if password and confirm_password and password != confirm_password:
             raise forms.ValidationError("Password and Confirm Password do not match")
+        return cleaned_data
 
     def save(self, commit=True):
         user = super().save(commit=False)
