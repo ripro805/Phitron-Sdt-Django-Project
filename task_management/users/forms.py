@@ -1,3 +1,17 @@
+from django.contrib.auth.forms import AuthenticationForm
+
+# Custom AuthenticationForm with styled widgets
+class StyledAuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400',
+            'placeholder': 'Enter your username',
+        })
+        self.fields['password'].widget.attrs.update({
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400',
+            'placeholder': 'Enter your password',
+        })
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -5,7 +19,7 @@ from django.contrib.auth.models import User
 from django import forms
 import re
 from tasks.forms import StyledFormMixin
-
+from django.contrib.auth.forms import AuthenticationForm
 
 
 
@@ -57,3 +71,8 @@ class CustomizeRegisterForm(StyledFormMixin, forms.ModelForm):
         if commit:
             user.save()
         return user
+
+class LoginForm(StyledFormMixin,AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        

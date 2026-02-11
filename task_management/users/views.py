@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login , logout
 from django.shortcuts import redirect
 from django.contrib import messages
+from users.forms import StyledAuthenticationForm
+from users. forms import LoginForm
 
 
 
@@ -28,17 +30,25 @@ def sign_up(request):
 
 
 def sign_in(request):
+    form=LoginForm()
     if request.method=='POST':
-        username=request.POST.get('username')
-        password=request.POST.get('password')
-        user= authenticate(request, username=username, password=password)
-        if user is not None:
+        form=LoginForm(request=request,data=request.POST)
+        if form.is_valid():
+           user=form.get_user()
+           auth_login(request, user)
+           return redirect('home')
+    return render(request, 'registration/login.html', {'form': form})
+           
+
+           
+def sign_out(request):
+    form = StyledAuthenticationForm()
+    if request.method == 'POST':
+        form = StyledAuthenticationForm(request=request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
             auth_login(request, user)
             return redirect('home')
-    return render(request, 'registration/login.html')
-def sign_out(request):
-    if request.method == 'POST':
-        logout(request)
-        return redirect('sign_in')
+    return render(request, 'registration/login.html', {'form': form})
 
 
