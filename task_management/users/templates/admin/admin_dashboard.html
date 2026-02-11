@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="{% static "css/output.css" %}" />
+    <link rel="stylesheet" href="{% static 'css/output.css' %}" />
   </head>
   <body>
     <header class="bg-white shadow-md">
@@ -101,9 +101,9 @@
     </header>
 
     <main>
-      <div class="container mx-auto px-6 py-4">
-        <p>Content goes here...</p>
-      </div>
+      {% block content %}
+      {% include "admin/user_list.html" %}
+      {% endblock content %}
     </main>
 
     <script>

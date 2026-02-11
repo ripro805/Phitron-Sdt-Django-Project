@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from django.contrib.auth.forms import AuthenticationForm
 
 # Custom AuthenticationForm with styled widgets
@@ -77,4 +78,11 @@ class CustomizeRegisterForm(StyledFormMixin, forms.ModelForm):
 class LoginForm(StyledFormMixin,AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
+class AssignRoleForm(forms.Form):
+  
+    role = forms.ModelChoiceField(queryset=Group.objects.all(), 
+                                  required=True, 
+                                  widget=forms.Select(attrs={'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400'}), 
+                                  empty_label="Select a role")
+                                                                                                          

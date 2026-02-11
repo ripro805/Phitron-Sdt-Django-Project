@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login as auth_login , logout
 from django.shortcuts import redirect
 from django.contrib import messages
 from users.forms import StyledAuthenticationForm
-from users. forms import LoginForm
+from users. forms import LoginForm, AssignRoleForm
 from django.contrib.auth.tokens import default_token_generator
 
 
@@ -68,4 +68,20 @@ def activate_account(request, uid, token):
         return redirect('sign_in')
     
 def admin_dashboard(request):
-    return render(request, 'admin/admin_dashboard.html')    
+    users = User.objects.all()
+    return render(request, 'admin/admin_dashboard.html', {'users': users})    
+
+def assign_role(request, user_id):
+    user = User.objects.get(id=user_id)
+    form = AssignRoleForm()
+    if request.method == 'POST':
+        form = AssignRoleForm(request.POST)
+        if form.is_valid():
+            role = form.cleaned_data['role']
+            user.groups.clear()  # Clear existing roles
+            user.groups.add(role)  # Assign new role
+            user.save()
+            messages.success(request, f"Role '{role.name}' has been assigned to {user.username}.")
+            return redirect('admin_dashboard')
+    
+    return render(request, 'admin/assign_role.html', {'form': form, 'user': user})
