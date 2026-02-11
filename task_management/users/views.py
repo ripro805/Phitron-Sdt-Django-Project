@@ -66,3 +66,6 @@ def activate_account(request, uid, token):
     else:
         messages.error(request, "Invalid or expired activation link.")
         return redirect('sign_in')
+    
+def admin_dashboard(request):
+    return render(request, 'admin/admin_dashboard.html')    
