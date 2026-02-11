@@ -5,8 +5,17 @@ from tasks.models import Employee, Task,TaskDetail, Project
 from datetime import date
 from django.db.models import Q, Count
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test,permission_required
 
 # Create your views here.
+
+def is_manager(user):
+    return user.groups.filter(name='Manager').exists()
+def is_employee(user):
+    return user.groups.filter(name='Employee').exists()
+
+
+@user_passes_test(is_manager, login_url='no_permission')     
 def manager_dashboard(request):
     type=request.GET.get('type', 'all')    
     # print("Type is:",type)
@@ -34,9 +43,9 @@ def manager_dashboard(request):
     }
     return render(request,'dashboard/manager_dashboard.html', context)
 
-
-def user_dashboard(request):
-    return render(request,'dashboard/user_dashboard.html')
+@user_passes_test(is_employee, login_url='no_permission')
+def employee_dashboard(request):
+    return render(request,'dashboard/employee_dashboard.html')
 
 def test(request):
     names = ["Mahmud", "Ahamed", "John", "Mr. X"]
@@ -49,7 +58,8 @@ def test(request):
         "count": count
     }
     return render(request, 'test.html', context)
-
+@login_required
+@permission_required('tasks.add_task', raise_exception=True)
 def create_task(request):
    # employees=Employee.objects.all()
     task_form=TaskModelForm() #get request
@@ -69,6 +79,8 @@ def create_task(request):
             return redirect('create-task')  # Redirect after successful submission  
     return render(request,'task_form.html',{'task_form':task_form,'task_detail_form':task_detail_form})
 
+@login_required
+@permission_required('tasks.change_task', raise_exception=True)
 def update_task(request,id):
    # employees=Employee.objects.all()
     task=Task.objects.get(id=id)
@@ -90,8 +102,19 @@ def update_task(request,id):
             messages.success(request, 'Task updated successfully!')
             return redirect('manager-dashboard')  # Redirect after successful submission  
     return render(request,'task_form.html',{'task_form':task_form,'task_detail_form':task_detail_form})
-
+@login_required
+@permission_required('tasks.view_task', raise_exception=True)
 def view_tasks(request):
    #task_count=Task.objects.aggregate(total=Count('id'))['total']
    projects=Project.objects.annotate(num_task=Count('task')).order_by('num_task')
    return render(request,'show_tasks.html',{"projects":projects})
+
+@login_required
+@permission_required('tasks.delete_task', raise_exception=True)
+def delete_task(request, id):
+    task = Task.objects.get(id=id)
+    if request.method == 'POST':
+        task.delete()
+        messages.success(request, 'Task deleted successfully!')
+        return redirect('manager-dashboard')
+    return render(request, 'confirm_delete.html', {'task': task})
