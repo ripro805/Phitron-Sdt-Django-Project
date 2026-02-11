@@ -1,13 +1,11 @@
 from django.shortcuts import render
 from django.contrib.auth.forms import UserCreationForm
-
-from users.forms import RegisterForm, CustomizeRegisterForm
+from users.forms import RegisterForm, CustomizeRegisterForm,LoginForm, AssignRoleForm,CreateGroupForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login , logout
 from django.shortcuts import redirect
 from django.contrib import messages
 from users.forms import StyledAuthenticationForm
-from users. forms import LoginForm, AssignRoleForm
 from django.contrib.auth.tokens import default_token_generator
 
 
@@ -85,3 +83,13 @@ def assign_role(request, user_id):
             return redirect('admin_dashboard')
     
     return render(request, 'admin/assign_role.html', {'form': form, 'user': user})
+
+def create_group(request):
+    form = CreateGroupForm()
+    if request.method == 'POST':
+        form = CreateGroupForm(request.POST)
+        if form.is_valid():
+            group= form.save()
+            messages.success(request, f"Group '{group.name}' created successfully.")
+            return redirect('create-group')
+    return render(request, 'admin/create_group.html', {'form': form})
