@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 class Employee(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -42,7 +41,7 @@ class TaskDetail(models.Model):
     )
     task=models.OneToOneField(
         Task, 
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         related_name='detail'
        )
     
@@ -60,3 +59,4 @@ class Project(models.Model):
     
     def __str__(self):
         return self.name
+    
