@@ -1,4 +1,11 @@
+from django.contrib.auth.models import Group
+import re
 from django.contrib.auth.forms import AuthenticationForm
+from django import forms
+
+from tasks.forms import StyledFormMixin
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User, Permission
 
 # Custom AuthenticationForm with styled widgets
 class StyledAuthenticationForm(AuthenticationForm):
@@ -12,16 +19,6 @@ class StyledAuthenticationForm(AuthenticationForm):
             'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400',
             'placeholder': 'Enter your password',
         })
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-
-
-from django import forms
-import re
-from tasks.forms import StyledFormMixin
-from django.contrib.auth.forms import AuthenticationForm
-
-
 
 class RegisterForm(UserCreationForm):
     class Meta:
@@ -77,4 +74,22 @@ class CustomizeRegisterForm(StyledFormMixin, forms.ModelForm):
 class LoginForm(StyledFormMixin,AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
+class AssignRoleForm(forms.Form):
+  
+    role = forms.ModelChoiceField(queryset=Group.objects.all(), 
+                                  required=True, 
+                                  widget=forms.Select(attrs={'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400'}), 
+                                  empty_label="Select a role")
+                                                                                             
+class CreateGroupForm(StyledFormMixin, forms.ModelForm):
+    permissions=forms.ModelMultipleChoiceField(
+        queryset=Permission.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'grid grid-cols-2 gap-2 text-sm',
+        }),
+        required=False
+    )
+    class Meta:
+        model=Group
+        fields=['name','permissions']

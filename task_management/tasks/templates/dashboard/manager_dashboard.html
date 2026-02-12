@@ -40,9 +40,12 @@
                       {% endfor %}
                     </div>
                     <div class="text-sm text-gray-500">{{ task.created_at|timesince }}</div>
-                    <div>
-                        <a href="{% url 'update-task' task.id %}" class="px-3 py-1 bg-green-500 hover:bg-green-950 text-white text-sm rounded-md">
+                    <div class="flex space-x-2">
+                        <a href="{% url 'update-task' task.id %}" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md">
                             Edit
+                        </a>
+                        <a href="{% url 'delete-task' task.id %}" class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md">
+                            Delete
                         </a>
                     </div>
                 </div>
