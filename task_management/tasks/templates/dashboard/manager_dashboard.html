@@ -1,26 +1,95 @@
- {% extends "dashboard/dashboard.html" %}
- {% block title %}Manager Dashboard{% endblock title %}
- {% block tasks %}
+{% extends "dashboard/dashboard_base.html" %}
+
+{% block dashboard_title %}Manager Dashboard{% endblock %}
+
+{% block dashboard_header %}Manager Dashboard{% endblock %}
+
+{% block stats_cards %}
+    <!-- Total Task Card -->
+    <div class="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <p class="text-gray-500 text-sm font-medium mb-4">TOTAL TASK</p>
+                <h2 class="text-4xl font-bold text-gray-800">{{ counts.total }}</h2>
+                <p class="text-gray-400 text-xs mt-1">Total tasks</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completed Task Card -->
+    <div class="bg-white rounded-lg p-6 shadow-sm">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <p class="text-gray-500 text-sm font-medium mb-4">COMPLETED TASK</p>
+                <h2 class="text-4xl font-bold text-green-600">{{ counts.completed }}</h2>
+                <p class="text-gray-400 text-xs mt-1">Tasks completed</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- In Progress Task Card -->
+    <div class="bg-white rounded-lg p-6 shadow-sm">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <p class="text-gray-500 text-sm font-medium mb-4">IN PROGRESS</p>
+                <h2 class="text-4xl font-bold text-yellow-600">{{ counts.inprogress }}</h2>
+                <p class="text-gray-400 text-xs mt-1">Tasks in progress</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Task Card -->
+    <div class="bg-white rounded-lg p-6 shadow-sm">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <p class="text-gray-500 text-sm font-medium mb-4">PENDING</p>
+                <h2 class="text-4xl font-bold text-red-600">{{ counts.pending }}</h2>
+                <p class="text-gray-400 text-xs mt-1">Tasks pending</p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block tasks %}
  <!-- Task Table -->
         <div class="bg-white rounded-xl shadow-sm ">
-            <div class="grid grid-cols-6 p-4 border-b border-gray-100 text-sm text-gray-500">
+            <div class="grid grid-cols-5 p-4 border-b border-gray-100 text-sm text-gray-500">
                 <div>Task Title</div>
                 <div>Status</div>
                 <div>Priority</div>
                 <div>Team</div>
                 <div>Created At</div>
-                <div>Actions</div>
             </div>
             <!-- Task Item Row 1 -->
 
             <div class="divide-y divide-gray-200">
                 <!-- Task Item Row 1 -->
                {% for task in tasks %}
-          
-                 <div class="grid grid-cols-6 items-center py-4 px-6">
+
+                 <div class="grid grid-cols-5 items-center py-4 px-6 hover:bg-gray-50 transition-colors cursor-pointer">
                     <div class="flex items-center">
                         <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                        <span class="text-sm text-gray-900">{{ task.title }}</span>
+                       <a href="{% url 'view_task_detail' task.id %}" class="text-sm text-gray-900 hover:text-blue-600 font-medium">{{task.title}}</a>
                     </div>
                     <div>
                         {% if task.status == 'COMPLETED' %}
@@ -32,26 +101,22 @@
                         {% endif %}
                     </div>
                     <div>
-                        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm">{{ task.detail.get_priority_display }}</span>
+                        {% if task.detail %}
+                            <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm">{{ task.detail.get_priority_display }}</span>
+                        {% else %}
+                            <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 text-sm">N/A</span>
+                        {% endif %}
                     </div>
                     <div class="flex -space-x-2">
-                      {% for emp in task.assigned_to.all %}
-                       <div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs">{{emp.name|slice:":2"}}</div>
+                      {% for user in task.assigned_to.all %}
+                       <div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs">{% if user.first_name %}{{user.first_name|slice:":2"}}{% else %}{{user.username|slice:":2"}}{% endif %}</div>
                       {% endfor %}
                     </div>
                     <div class="text-sm text-gray-500">{{ task.created_at|timesince }}</div>
-                    <div class="flex space-x-2">
-                        <a href="{% url 'update-task' task.id %}" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md">
-                            Edit
-                        </a>
-                        <a href="{% url 'delete-task' task.id %}" class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md">
-                            Delete
-                        </a>
-                    </div>
                 </div>
-          
+
                {% endfor %}
             </div>
-            
+
         </div>
         {% endblock tasks %}

@@ -53,6 +53,10 @@ class StyledFormMixin:
                 field.widget.attrs.update({
                     'class': "space-y-2"
                 })
+            elif isinstance(field.widget, forms.ClearableFileInput):
+                field.widget.attrs.update({
+                    'class': "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100"
+                })
             else:
                 print("Inside else")
                 field.widget.attrs.update({
@@ -81,5 +85,5 @@ class TaskModelForm(StyledFormMixin, forms.ModelForm):
 class TaskDetailModelForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = TaskDetail
-        fields = ['priority', 'notes']
+        fields = ['priority', 'notes', 'asset_image', 'asset_caption']
           

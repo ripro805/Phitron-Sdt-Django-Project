@@ -1,25 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gradient-to-br from-blue-100 to-purple-200 min-h-screen flex items-center justify-center">
-    <div class="bg-white rounded-xl shadow-lg p-10 w-full max-w-md text-center">
-        <h1 class="text-3xl font-bold mb-6 text-blue-700">Welcome to the Home Page</h1>
-        {% if user.is_authenticated %}
-            <div class="mb-4 text-lg text-gray-700">Hello, <span class="font-semibold">{{ user.username }}</span>!</div>
-            <form action="{% url 'sign_out' %}" method ='POST' class="mt-6">
-                {% csrf_token %}
-                <button type="submit" class="w-full py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition">Logout</button>
-            </form>
-        {% else %}
-            <div class="mb-4 text-lg text-gray-700">Anonymous User</div>
-            <a href="{% url 'sign_in' %}" class="inline-block mt-4 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition">Login</a>
-            <a href="/users/sign-up/" class="inline-block mt-4 ml-2 px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition">Register</a>
-        {% endif %}
+{% extends "base.html" %}
+{% block content %}
+  <!-- Banner Carousel -->
+  <section class="relative w-full bg-gradient-to-r from-blue-100 to-cyan-100">
+    <div class="container mx-auto px-6 py-10 md:py-16 flex flex-col md:flex-row items-center gap-8">
+      <div class="w-full md:w-1/2 text-center md:text-left">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-blue-700 mb-6 leading-tight drop-shadow">Welcome to <span class="text-cyan-500">TaskPro</span></h1>
+        <p class="text-lg md:text-xl text-gray-700 mb-8">Supercharge your productivity and manage your team's tasks with style, speed, and simplicity.</p>
+        <a href="{% url 'sign_up' %}" class="inline-block bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-4 rounded-lg font-bold text-lg shadow-lg hover:from-blue-600 hover:to-cyan-600 transition">Get Started</a>
+      </div>
+      <div class="w-full md:w-1/2">
+        <div class="relative rounded-xl overflow-hidden shadow-2xl">
+          <div class="carousel relative" id="banner-carousel">
+            <div class="carousel-item block">
+              <img src="/static/images/banner/152.jpg" alt="Banner 1" class="w-full h-64 md:h-80 object-cover transition duration-700" />
+            </div>
+            <div class="carousel-item hidden">
+              <img src="/static/images/banner/7463554.jpg" alt="Banner 2" class="w-full h-64 md:h-80 object-cover transition duration-700" />
+            </div>
+            <div class="carousel-item hidden">
+              <img src="/static/images/banner/copy-space-calendar-with-pills-beside.jpg" alt="Banner 3" class="w-full h-64 md:h-80 object-cover transition duration-700" />
+            </div>
+            <button id="prev-banner" class="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-blue-100 transition"><svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+            <button id="next-banner" class="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-blue-100 transition"><svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+        </div>
+      </div>
     </div>
-</body>
-</html>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-20 md:py-28 bg-white">
+    <div class="container mx-auto px-6">
+      <h2 class="text-3xl md:text-4xl font-extrabold text-center text-blue-700 mb-16">Tailored for Every Role</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <!-- Admin Card -->
+        <div class="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl shadow-lg p-8 hover:scale-105 transition-transform">
+          <h3 class="text-2xl font-bold mb-4 text-blue-700">Admin</h3>
+          <ul class="list-disc list-inside text-gray-700 space-y-2">
+            <li>Manage user roles and permissions</li>
+            <li>Generate comprehensive reports</li>
+            <li>Configure system-wide settings</li>
+            <li>Monitor team performance</li>
+          </ul>
+        </div>
+        <!-- Manager Card -->
+        <div class="bg-gradient-to-br from-cyan-100 to-blue-100 rounded-2xl shadow-lg p-8 hover:scale-105 transition-transform">
+          <h3 class="text-2xl font-bold mb-4 text-cyan-700">Manager</h3>
+          <ul class="list-disc list-inside text-gray-700 space-y-2">
+            <li>Create and assign tasks to employees</li>
+            <li>Track project progress in real-time</li>
+            <li>Set deadlines and priorities</li>
+            <li>Generate team performance reports</li>
+          </ul>
+        </div>
+        <!-- Employee Card -->
+        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl shadow-lg p-8 hover:scale-105 transition-transform">
+          <h3 class="text-2xl font-bold mb-4 text-blue-500">Employee</h3>
+          <ul class="list-disc list-inside text-gray-700 space-y-2">
+            <li>View and manage assigned tasks</li>
+            <li>Collaborate with team members</li>
+            <li>Update task status and progress</li>
+            <li>Track personal productivity</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="bg-gradient-to-r from-blue-600 to-cyan-500 py-20 md:py-28">
+    <div class="container mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-4xl font-extrabold mb-6 text-white drop-shadow">Ready to Boost Your Team's Productivity?</h2>
+      <p class="text-xl text-blue-100 mb-10">Join thousands of organizations already using <span class="font-bold">TaskPro</span></p>
+      <a href="#" class="bg-white text-blue-600 px-10 py-4 rounded-lg font-bold text-lg shadow-lg hover:bg-blue-100 transition">Start Free Trial</a>
+    </div>
+  </section>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+  // Simple banner carousel
+  const carousel = document.getElementById("banner-carousel");
+  const items = carousel.querySelectorAll(".carousel-item");
+  let current = 0;
+  function showItem(idx) {
+    items.forEach((el, i) => el.classList.toggle("hidden", i !== idx));
+  }
+  document.getElementById("prev-banner").onclick = function() {
+    current = (current - 1 + items.length) % items.length;
+    showItem(current);
+  };
+  document.getElementById("next-banner").onclick = function() {
+    current = (current + 1) % items.length;
+    showItem(current);
+  };
+  showItem(current);
+</script>
+{% endblock %}

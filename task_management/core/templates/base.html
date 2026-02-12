@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{% block title %}TaskPro - Efficient Task Management{% endblock %}</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		{% block extra_head %}{% endblock %}
+	</head>
+	<body class="font-sans bg-gray-100">
+		{% block navbar %}
+			{% if user.is_authenticated %}
+				{% if user.is_superuser %}
+					{% include 'logged_nav.html' with dashboard_url='/users/admin-dashboard/' %}
+				{% else %}
+					{% for group in user.groups.all %}
+						{% if group.name == "Admin" %}
+							{% include 'logged_nav.html' with dashboard_url='/users/admin-dashboard/' %}
+						{% elif group.name == "Manager" %}
+							{% include 'logged_nav.html' with dashboard_url='/tasks/manager-dashboard/' %}
+						{% elif group.name == "Employee" %}
+							{% include 'logged_nav.html' with dashboard_url='/tasks/employee-dashboard/' %}
+						{% endif %}
+					{% empty %}
+						{% include 'logged_nav.html' with dashboard_url='/' %}
+					{% endfor %}
+				{% endif %}
+			{% else %}
+				{% include "non_logged_nav.html" %}
+			{% endif %}
+		{% endblock %}
+		<main>
+			{% block content %}{% endblock %}
+		</main>
+		<footer class="bg-gray-900 text-white py-12">
+			<div class="container mx-auto px-6">
+				<div class="flex flex-wrap justify-between">
+					<div class="w-full md:w-1/4 mb-8 md:mb-0">
+						<h3 class="text-lg font-extrabold mb-4 text-blue-400">TaskPro</h3>
+						<p class="text-gray-400">Empowering teams with efficient task management solutions.</p>
+					</div>
+					<div class="w-full md:w-1/4 mb-8 md:mb-0">
+						<h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+						<ul class="text-gray-400 space-y-2">
+							<li><a href="{% url 'home' %}" class="hover:text-blue-300">Home</a></li>
+							<li><a href="{% url 'sign_up' %}" class="hover:text-blue-300">Sign Up</a></li>
+							<li><a href="{% url 'sign_in' %}" class="hover:text-blue-300">Sign In</a></li>
+							<li><a href="#" class="hover:text-blue-300">Contact</a></li>
+						</ul>
+					</div>
+					<div class="w-full md:w-1/4 mb-8 md:mb-0">
+						<h4 class="text-lg font-semibold mb-4">Connect</h4>
+						<ul class="text-gray-400 space-y-2">
+							<li><a href="#" class="hover:text-blue-300">Twitter</a></li>
+							<li><a href="#" class="hover:text-blue-300">LinkedIn</a></li>
+							<li><a href="#" class="hover:text-blue-300">Facebook</a></li>
+						</ul>
+					</div>
+					<div class="w-full md:w-1/4">
+						<h4 class="text-lg font-semibold mb-4">Newsletter</h4>
+						<form class="flex">
+							<input type="email" placeholder="Your email" class="w-full px-3 py-2 text-gray-700 bg-gray-200 rounded-l-md focus:outline-none" required />
+							<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-300">Subscribe</button>
+						</form>
+					</div>
+				</div>
+				<div class="border-t border-gray-700 mt-12 pt-8 text-sm text-center text-gray-400">&copy; 2026 TaskPro. All rights reserved.</div>
+			</div>
+		</footer>
+		<script>
+			// Mobile menu toggle (for navbars that use it)
+			document.addEventListener('DOMContentLoaded', function() {
+				var menuBtn = document.getElementById("menu-toggle");
+				var mobileMenu = document.getElementById("mobile-menu");
+				if(menuBtn && mobileMenu) {
+					menuBtn.addEventListener("click", function () {
+						mobileMenu.classList.toggle("hidden");
+					});
+				}
+			});
+		</script>
+		{% block extra_scripts %}{% endblock %}
+	</body>
+</html>

@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gradient-to-br from-green-100 to-blue-200 min-h-screen flex items-center justify-center">
+{% extends "base.html" %}
+{% block title %}Register - TaskPro{% endblock %}
+{% block navbar %}
+  {% include "non_logged_nav.html" %}
+{% endblock %}
+{% block content %}
+<div class="bg-gradient-to-br from-green-100 to-blue-200 min-h-screen flex items-center justify-center">
     <div class="bg-white rounded-xl shadow-lg p-10 w-full max-w-md">
         <h1 class="text-3xl font-bold mb-6 text-green-700 text-center">Registration</h1>
         {% if messages %}
@@ -40,5 +38,5 @@
             <a href="{% url 'sign_in' %}" class="text-green-600 hover:underline">Already have an account? Login</a>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

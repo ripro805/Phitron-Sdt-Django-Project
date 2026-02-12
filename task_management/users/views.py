@@ -46,14 +46,9 @@ def sign_in(request):
 
 @login_required           
 def sign_out(request):
-    form = StyledAuthenticationForm()
-    if request.method == 'POST':
-        form = StyledAuthenticationForm(request=request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            auth_login(request, user)
-            return redirect('home')
-    return render(request, 'registration/login.html', {'form': form})
+    logout(request)
+    messages.success(request, 'You have been successfully logged out.')
+    return redirect('home')
 
 
 def activate_account(request, uid, token):
@@ -107,7 +102,7 @@ def create_group(request):
         if form.is_valid():
             group= form.save()
             messages.success(request, f"Group '{group.name}' created successfully.")
-            return redirect('create-group')
+            return redirect('create_group')
     return render(request, 'admin/create_group.html', {'form': form})
 @user_passes_test(is_admin,login_url='no_permission')    
 def group_list(request):
