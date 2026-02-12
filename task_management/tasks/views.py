@@ -170,6 +170,29 @@ def view_tasks(request):
     return render(request, 'show_tasks.html', context)
 
 @login_required
+@permission_required('tasks.view_task', raise_exception=True)
+def view_task_detail(request, id):
+    task = Task.objects.select_related('detail', 'project').prefetch_related('assigned_to').get(id=id)
+
+    # Handle status change
+    if request.method == 'POST' and 'task_status' in request.POST:
+        if request.user.has_perm('tasks.change_task'):
+            new_status = request.POST.get('task_status')
+            if new_status in ['PENDING', 'IN_PROGRESS', 'COMPLETED']:
+                task.status = new_status
+                task.is_completed = (new_status == 'COMPLETED')
+                task.save()
+                messages.success(request, f'Task status updated to {task.get_status_display()}!')
+            return redirect('view_task_detail', id=id)
+        else:
+            messages.error(request, 'You do not have permission to change task status.')
+
+    context = {
+        'task': task,
+    }
+    return render(request, 'task_detail.html', context)
+
+@login_required
 @permission_required('tasks.delete_task', raise_exception=True)
 def delete_task(request, id):
     task = Task.objects.get(id=id)

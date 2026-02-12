@@ -10,7 +10,7 @@
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-gray-500 text-sm font-medium mb-4">TOTAL TASK</p>
-                <h2 class="text-4xl font-bold text-gray-800">{{ total_tasks }}</h2>
+                <h2 class="text-4xl font-bold text-gray-800">{{ counts.total }}</h2>
                 <p class="text-gray-400 text-xs mt-1">Total tasks</p>
             </div>
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -26,7 +26,7 @@
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-gray-500 text-sm font-medium mb-4">COMPLETED TASK</p>
-                <h2 class="text-4xl font-bold text-green-600">{{ completed_tasks }}</h2>
+                <h2 class="text-4xl font-bold text-green-600">{{ counts.completed }}</h2>
                 <p class="text-gray-400 text-xs mt-1">Tasks completed</p>
             </div>
             <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -42,7 +42,7 @@
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-gray-500 text-sm font-medium mb-4">IN PROGRESS</p>
-                <h2 class="text-4xl font-bold text-yellow-600">{{ in_progress_tasks }}</h2>
+                <h2 class="text-4xl font-bold text-yellow-600">{{ counts.inprogress }}</h2>
                 <p class="text-gray-400 text-xs mt-1">Tasks in progress</p>
             </div>
             <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -58,7 +58,7 @@
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-gray-500 text-sm font-medium mb-4">PENDING</p>
-                <h2 class="text-4xl font-bold text-red-600">{{ pending_tasks }}</h2>
+                <h2 class="text-4xl font-bold text-red-600">{{ counts.pending }}</h2>
                 <p class="text-gray-400 text-xs mt-1">Tasks pending</p>
             </div>
             <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
@@ -90,7 +90,7 @@
                  <div class="grid grid-cols-6 items-center py-4 px-6">
                     <div class="flex items-center">
                         <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                        <span class="text-sm text-gray-900">{{ task.title }}</span>
+                       <a href="{% url 'view_task_detail' task.id %}" class="text-sm text-gray-900">{{task.title}}</a>
                     </div>
                     <div>
                         {% if task.status == 'COMPLETED' %}
@@ -102,7 +102,11 @@
                         {% endif %}
                     </div>
                     <div>
-                        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm">{{ task.detail.get_priority_display }}</span>
+                        {% if task.detail %}
+                            <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm">{{ task.detail.get_priority_display }}</span>
+                        {% else %}
+                            <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 text-sm">N/A</span>
+                        {% endif %}
                     </div>
                     <div class="flex -space-x-2">
                       {% for emp in task.assigned_to.all %}
