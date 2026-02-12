@@ -45,7 +45,32 @@ def manager_dashboard(request):
 
 @user_passes_test(is_employee, login_url='no_permission')
 def employee_dashboard(request):
-    return render(request,'dashboard/employee_dashboard.html')
+    # Get tasks assigned to the current employee
+    try:
+        employee = Employee.objects.get(email=request.user.email)
+        my_tasks = Task.objects.filter(assigned_to=employee).select_related('detail')
+        
+        # Task statistics for employee
+        task_counts = {
+            'total': my_tasks.count(),
+            'pending': my_tasks.filter(status='PENDING').count(),
+            'in_progress': my_tasks.filter(status='IN_PROGRESS').count(),
+            'completed': my_tasks.filter(status='COMPLETED').count(),
+        }
+        
+        context = {
+            'my_tasks': my_tasks,
+            'task_counts': task_counts,
+        }
+    except Employee.DoesNotExist:
+        # If user is not linked to Employee model
+        context = {
+            'my_tasks': [],
+            'task_counts': {'total': 0, 'pending': 0, 'in_progress': 0, 'completed': 0},
+            'message': 'Employee profile not found. Please contact administrator.'
+        }
+    
+    return render(request, 'dashboard/employee_dashboard.html', context)
 
 def test(request):
     names = ["Mahmud", "Ahamed", "John", "Mr. X"]
@@ -100,14 +125,49 @@ def update_task(request,id):
             task_detail.save()
             
             messages.success(request, 'Task updated successfully!')
-            return redirect('manager-dashboard')  # Redirect after successful submission  
+            return redirect('manager_dashboard')  # Redirect after successful submission
     return render(request,'task_form.html',{'task_form':task_form,'task_detail_form':task_detail_form})
 @login_required
 @permission_required('tasks.view_task', raise_exception=True)
 def view_tasks(request):
-   #task_count=Task.objects.aggregate(total=Count('id'))['total']
-   projects=Project.objects.annotate(num_task=Count('task')).order_by('num_task')
-   return render(request,'show_tasks.html',{"projects":projects})
+    # Role-based task viewing
+    user = request.user
+    
+    if user.groups.filter(name='Admin').exists() or user.is_superuser:
+        # Admin can see all tasks
+        projects = Project.objects.annotate(num_task=Count('task')).order_by('num_task')
+        tasks = Task.objects.all().select_related('detail')
+        context_message = "All Tasks (Admin View)"
+        
+    elif user.groups.filter(name='Manager').exists():
+        # Manager can see all tasks
+        projects = Project.objects.annotate(num_task=Count('task')).order_by('num_task')
+        tasks = Task.objects.all().select_related('detail')
+        context_message = "All Tasks (Manager View)"
+        
+    elif user.groups.filter(name='Employee').exists():
+        # Employee can only see their assigned tasks
+        try:
+            employee = Employee.objects.get(user=user)
+            projects = Project.objects.filter(task__assigned_to=employee).annotate(num_task=Count('task')).order_by('num_task').distinct()
+            tasks = Task.objects.filter(assigned_to=employee).select_related('detail')
+            context_message = "My Assigned Tasks"
+        except Employee.DoesNotExist:
+            projects = Project.objects.none()
+            tasks = Task.objects.none()
+            context_message = "Employee profile not found"
+    else:
+        # Default: no specific role
+        projects = Project.objects.none()
+        tasks = Task.objects.none()
+        context_message = "No tasks available"
+    
+    context = {
+        "projects": projects,
+        "tasks": tasks,
+        "context_message": context_message,
+    }
+    return render(request, 'show_tasks.html', context)
 
 @login_required
 @permission_required('tasks.delete_task', raise_exception=True)

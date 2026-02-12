@@ -1,0 +1,120 @@
+
+<header class="bg-white shadow-md sticky top-0 z-50">
+	<nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+		<div class="flex items-center gap-2">
+			<a href="{% url 'home' %}">
+				<img src="/static/images/banner/152.jpg" alt="TaskPro Logo" class="h-10 w-10 rounded-full shadow-md border-2 border-blue-500" />
+			</a>
+			<a href="{% url 'home' %}" class="text-2xl font-extrabold text-blue-600 tracking-tight">TaskPro</a>
+		</div>
+		<div class="hidden md:flex space-x-6">
+			<a href="{{ dashboard_url|default:'/' }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Dashboard</a>
+			
+			{# Admin-specific navigation #}
+			{% for group in user.groups.all %}
+				{% if group.name == "Admin" %}
+					<a href="{% url 'group_list' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">Groups</a>
+					<a href="{% url 'create_group' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">Create Group</a>
+					<a href="{% url 'admin_dashboard' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">User Management</a>
+				{% elif group.name == "Manager" %}
+					<a href="{% url 'view_tasks' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">All Tasks</a>
+					<a href="{% url 'create-task' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">Create Task</a>
+				{% elif group.name == "Employee" %}
+					<a href="{% url 'view_tasks' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">My Tasks</a>
+					<a href="{% url 'employee_dashboard' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">My Dashboard</a>
+				{% endif %}
+			{% endfor %}
+			
+			<a href="{% url 'home' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">Home</a>
+		</div>
+		<div class="flex items-center gap-3">
+			<div class="relative group">
+				<button class="flex items-center focus:outline-none" id="user-menu-btn">
+					<img src="/static/images/banner/7463554.jpg" alt="User Avatar" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+					<svg class="ml-2 h-5 w-5 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+				</button>
+				<div id="user-menu" class="hidden absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-100">
+					{# Role-specific dropdown menu #}
+					{% for group in user.groups.all %}
+						{% if group.name == "Admin" %}
+							<a href="{% url 'admin_dashboard' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Admin Panel</a>
+							<a href="{% url 'group_list' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Groups</a>
+							<a href="{% url 'create_group' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Create Group</a>
+						{% elif group.name == "Manager" %}
+							<a href="{% url 'manager_dashboard' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Manager Panel</a>
+							<a href="{% url 'create-task' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Create Task</a>
+							<a href="{% url 'view_tasks' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">All Tasks</a>
+						{% elif group.name == "Employee" %}
+							<a href="{% url 'employee_dashboard' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">My Dashboard</a>
+							<a href="{% url 'view_tasks' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">My Tasks</a>
+						{% endif %}
+					{% endfor %}
+					
+					<hr class="my-2 border-gray-200">
+					<a href="{% url 'home' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Home</a>
+					<form method="post" action="{% url 'sign_out' %}" class="m-0">
+						{% csrf_token %}
+						<button type="submit" class="w-full text-left px-4 py-2 text-red-500 hover:bg-blue-50">Logout</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="md:hidden">
+			<button id="menu-toggle" class="text-gray-700 hover:text-blue-600 focus:outline-none">
+				<svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+				</svg>
+			</button>
+		</div>
+	</nav>
+	<div id="mobile-menu" class="md:hidden hidden bg-white px-6 pb-4 shadow">
+		<a href="{{ dashboard_url|default:'/' }}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Dashboard</a>
+		
+		{# Role-specific mobile navigation #}
+		{% for group in user.groups.all %}
+			{% if group.name == "Admin" %}
+				<a href="{% url 'admin_dashboard' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">User Management</a>
+				<a href="{% url 'group_list' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Groups</a>
+				<a href="{% url 'create_group' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Create Group</a>
+			{% elif group.name == "Manager" %}
+				<a href="{% url 'view_tasks' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">All Tasks</a>
+				<a href="{% url 'create-task' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Create Task</a>
+			{% elif group.name == "Employee" %}
+				<a href="{% url 'view_tasks' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">My Tasks</a>
+				<a href="{% url 'employee_dashboard' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">My Dashboard</a>
+			{% endif %}
+		{% endfor %}
+		
+		<a href="{% url 'home' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Home</a>
+		<form method="post" action="{% url 'sign_out' %}" class="m-0">
+			{% csrf_token %}
+			<button type="submit" class="w-full text-left py-2 text-red-500 hover:bg-blue-50">Logout</button>
+		</form>
+	</div>
+</header>
+
+<script>
+	// Mobile menu toggle
+	document.addEventListener('DOMContentLoaded', function() {
+		document.getElementById("menu-toggle").addEventListener("click", function () {
+			document.getElementById("mobile-menu").classList.toggle("hidden");
+		});
+		// User menu dropdown
+		const userBtn = document.getElementById("user-menu-btn");
+		const userMenu = document.getElementById("user-menu");
+		if (userBtn && userMenu) {
+			userBtn.addEventListener("click", function(e) {
+				e.stopPropagation();
+				userMenu.classList.toggle("hidden");
+			});
+			document.addEventListener("click", function(e) {
+				if (!userMenu.classList.contains("hidden")) {
+					userMenu.classList.add("hidden");
+				}
+			});
+			userMenu.addEventListener("click", function(e) {
+				e.stopPropagation();
+			});
+		}
+	});
+</script>
