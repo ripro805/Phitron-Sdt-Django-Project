@@ -8,6 +8,7 @@ from django.contrib import messages
 from users.forms import StyledAuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Prefetch
 
 
 # Create your views here.
@@ -74,11 +75,18 @@ def activate_account(request, uid, token):
 
 @user_passes_test(is_admin,login_url='no_permission')    
 def admin_dashboard(request):
-    users = User.objects.all()
+    users = User.objects.only('id', 'first_name', 'last_name', 'email').prefetch_related(
+        Prefetch('groups', queryset=Group.objects.only('id', 'name'))
+    ).order_by('-date_joined')
+    
+    # Use prefetched data - no additional queries
+    for user in users:
+        groups = list(user.groups.all())  # Uses prefetched cache
+        user.group_name = groups[0].name if groups else "No Group Assigned"
     return render(request, 'admin/admin_dashboard.html', {'users': users})    
 @user_passes_test(is_admin,login_url='no_permission')    
 def assign_role(request, user_id):
-    user = User.objects.get(id=user_id)
+    user = User.objects.prefetch_related('groups').get(id=user_id)
     form = AssignRoleForm()
     if request.method == 'POST':
         form = AssignRoleForm(request.POST)
@@ -103,5 +111,5 @@ def create_group(request):
     return render(request, 'admin/create_group.html', {'form': form})
 @user_passes_test(is_admin,login_url='no_permission')    
 def group_list(request):
-    groups = Group.objects.all()
+    groups = Group.objects.prefetch_related('permissions').all()
     return render(request, 'admin/group_list.html', {'groups': groups})
