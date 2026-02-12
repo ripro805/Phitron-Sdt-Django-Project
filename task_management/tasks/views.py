@@ -82,7 +82,7 @@ def create_task(request):
     task_detail_form=TaskDetailModelForm()
     if request.method=='POST':
         task_form=TaskModelForm(request.POST)
-        task_detail_form=TaskDetailModelForm(request.POST)
+        task_detail_form=TaskDetailModelForm(request.POST, request.FILES)
         if task_form.is_valid() and task_detail_form.is_valid():
             # Process the form data
             #For Model Form
@@ -90,9 +90,9 @@ def create_task(request):
             task_detail=task_detail_form.save(commit=False)
             task_detail.task = task
             task_detail.save()
-            
+
             messages.success(request, 'Task created successfully!')
-            return redirect('create-task')  # Redirect after successful submission  
+            return redirect('create-task')  # Redirect after successful submission
     return render(request,'task_form.html',{'task_form':task_form,'task_detail_form':task_detail_form})
 
 @login_required
@@ -115,9 +115,9 @@ def update_task(request, id):
 
         # Handle TaskDetail form - create new or update existing
         if task_detail:
-            task_detail_form = TaskDetailModelForm(request.POST, instance=task_detail)
+            task_detail_form = TaskDetailModelForm(request.POST, request.FILES, instance=task_detail)
         else:
-            task_detail_form = TaskDetailModelForm(request.POST)
+            task_detail_form = TaskDetailModelForm(request.POST, request.FILES)
 
         if task_form.is_valid() and task_detail_form.is_valid():
             # Save task

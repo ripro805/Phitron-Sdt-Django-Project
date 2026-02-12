@@ -159,10 +159,44 @@
 
             <!-- Additional Notes -->
             {% if task.detail and task.detail.notes %}
-              <div>
+              <div class="mb-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-3">Additional Notes</h3>
                 <div class="prose prose-sm max-w-none text-gray-700 leading-relaxed bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
                   {{ task.detail.notes|linebreaks }}
+                </div>
+              </div>
+            {% endif %}
+
+            <!-- Task Asset/Screenshot -->
+            {% if task.detail and task.detail.asset_image %}
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold text-gray-900">Task Asset</h3>
+                </div>
+
+                <div class="relative bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-blue-400 transition-all duration-200 hover:shadow-lg">
+                  <div class="aspect-video bg-gray-100 overflow-hidden group">
+                    <img
+                      src="{{ task.detail.asset_image.url }}"
+                      alt="{{ task.detail.asset_caption|default:'Task screenshot' }}"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  </div>
+                  <a
+                    href="{{ task.detail.asset_image.url }}"
+                    target="_blank"
+                    class="absolute top-2 right-2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-2 rounded-full transition-opacity"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                  </a>
+                  {% if task.detail.asset_caption %}
+                    <div class="p-4 bg-white">
+                      <p class="text-sm text-gray-700 font-medium">{{ task.detail.asset_caption }}</p>
+                    </div>
+                  {% endif %}
                 </div>
               </div>
             {% endif %}

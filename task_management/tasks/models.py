@@ -41,17 +41,20 @@ class TaskDetail(models.Model):
         (LOW, 'Low'),
     )
     task=models.OneToOneField(
-        Task, 
+        Task,
         on_delete=models.DO_NOTHING,
         related_name='detail'
        )
-    
+
     priority=models.CharField(max_length=1, choices=PRIORITY_CHOICES,default=LOW)
     notes = models.TextField(blank=True, null=True)
+    asset_image = models.ImageField(upload_to='task_assets/%Y/%m/%d/', blank=True, null=True)
+    asset_caption = models.CharField(max_length=200, blank=True, null=True)
+
     def __str__(self):
         return f"Details form Task {self.task.title}"
-    
-    
+
+
 class Project(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
