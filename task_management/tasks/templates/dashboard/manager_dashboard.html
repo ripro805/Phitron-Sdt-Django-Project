@@ -73,24 +73,23 @@
 {% block tasks %}
  <!-- Task Table -->
         <div class="bg-white rounded-xl shadow-sm ">
-            <div class="grid grid-cols-6 p-4 border-b border-gray-100 text-sm text-gray-500">
+            <div class="grid grid-cols-5 p-4 border-b border-gray-100 text-sm text-gray-500">
                 <div>Task Title</div>
                 <div>Status</div>
                 <div>Priority</div>
                 <div>Team</div>
                 <div>Created At</div>
-                <div>Actions</div>
             </div>
             <!-- Task Item Row 1 -->
 
             <div class="divide-y divide-gray-200">
                 <!-- Task Item Row 1 -->
                {% for task in tasks %}
-          
-                 <div class="grid grid-cols-6 items-center py-4 px-6">
+
+                 <div class="grid grid-cols-5 items-center py-4 px-6 hover:bg-gray-50 transition-colors cursor-pointer">
                     <div class="flex items-center">
                         <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                       <a href="{% url 'view_task_detail' task.id %}" class="text-sm text-gray-900">{{task.title}}</a>
+                       <a href="{% url 'view_task_detail' task.id %}" class="text-sm text-gray-900 hover:text-blue-600 font-medium">{{task.title}}</a>
                     </div>
                     <div>
                         {% if task.status == 'COMPLETED' %}
@@ -114,18 +113,10 @@
                       {% endfor %}
                     </div>
                     <div class="text-sm text-gray-500">{{ task.created_at|timesince }}</div>
-                    <div class="flex space-x-2">
-                        <a href="{% url 'update-task' task.id %}" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md">
-                            Edit
-                        </a>
-                        <a href="{% url 'delete-task' task.id %}" class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md">
-                            Delete
-                        </a>
-                    </div>
                 </div>
-          
+
                {% endfor %}
             </div>
-            
+
         </div>
         {% endblock tasks %}

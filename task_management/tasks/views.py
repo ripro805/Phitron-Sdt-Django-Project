@@ -182,7 +182,9 @@ def view_task_detail(request, id):
     if request.method == 'POST' and 'task_status' in request.POST:
         if request.user.has_perm('tasks.change_task'):
             new_status = request.POST.get('task_status')
-            if new_status in ['PENDING', 'IN_PROGRESS', 'COMPLETED']:
+            # Get valid status choices from model
+            valid_statuses = [choice[0] for choice in Task.STATUS_CHOICES]
+            if new_status in valid_statuses:
                 task.status = new_status
                 task.is_completed = (new_status == 'COMPLETED')
                 task.save()
@@ -207,6 +209,7 @@ def view_task_detail(request, id):
     context = {
         'task': task,
         'team_members': team_members,
+        'status_choices': Task.STATUS_CHOICES,
     }
     return render(request, 'task_detail.html', context)
 

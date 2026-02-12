@@ -48,7 +48,7 @@ class TaskDetail(models.Model):
 
     priority=models.CharField(max_length=1, choices=PRIORITY_CHOICES,default=LOW)
     notes = models.TextField(blank=True, null=True)
-    asset_image = models.ImageField(upload_to='task_assets/%Y/%m/%d/', blank=True, null=True)
+    asset_image = models.ImageField(upload_to='task_assets/%Y/%m/%d/', blank=True, null=True,default="task_assets/default_image.jpg")
     asset_caption = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):

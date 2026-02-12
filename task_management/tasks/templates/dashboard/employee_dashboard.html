@@ -54,18 +54,18 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     {% for task in my_tasks %}
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 cursor-pointer">
                         <td class="py-4">
                             <div class="flex items-center">
-                                <span class="w-2 h-2 
+                                <span class="w-2 h-2
                                     {% if task.status == 'COMPLETED' %}bg-green-500
-                                    {% elif task.status == 'IN_PROGRESS' %}bg-yellow-500  
+                                    {% elif task.status == 'IN_PROGRESS' %}bg-yellow-500
                                     {% else %}bg-blue-500{% endif %}
                                     rounded-full mr-3"></span>
                                 <div>
-                                    <div class="font-medium text-gray-900">{{ task.title }}</div>
+                                    <a href="{% url 'view_task_detail' task.id %}" class="font-medium text-gray-900 hover:text-blue-600">{{ task.title }}</a>
                                     <div class="text-sm text-gray-500">
-                                        {% if task.detail.description %}{{ task.detail.description|truncatechars:50 }}{% endif %}
+                                        {% if task.description %}{{ task.description|truncatechars:50 }}{% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -80,14 +80,14 @@
                         </td>
                         <td class="py-4">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                {% if task.detail.priority == 'HIGH' %}bg-red-100 text-red-800
-                                {% elif task.detail.priority == 'MEDIUM' %}bg-orange-100 text-orange-800
+                                {% if task.detail.priority == 'H' %}bg-red-100 text-red-800
+                                {% elif task.detail.priority == 'M' %}bg-orange-100 text-orange-800
                                 {% else %}bg-green-100 text-green-800{% endif %}">
                                 {% if task.detail.priority %}{{ task.detail.get_priority_display }}{% else %}Normal{% endif %}
                             </span>
                         </td>
                         <td class="py-4 text-sm text-gray-500">
-                            {% if task.detail.due_date %}{{ task.detail.due_date|date:"M d, Y" }}{% else %}Not set{% endif %}
+                            {% if task.due_date %}{{ task.due_date|date:"M d, Y" }}{% else %}Not set{% endif %}
                         </td>
                     </tr>
                     {% endfor %}
