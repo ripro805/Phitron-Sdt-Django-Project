@@ -5,19 +5,25 @@ from tasks.models import Task
 #signals
 
 @receiver(m2m_changed, sender=Task.assigned_to.through)
-def notify_employees_on_tasks_creation(sender, instance,action, **kwargs):
-    if action=='post_add':
-        employees = instance.assigned_to.all()
-        for employee in employees:
-            print(f"Notification: Task '{instance.title}' has been assigned to {employee.name} ({employee.email})")
-            
-        send_mail(
-            subject=f"New Task Assigned: {instance.title}",
-            message=f"You have been assigned a new task: {instance.title}\nDescription: {instance.description}\nDue Date: {instance.due_date}",
-            from_email="rifatrizviofficial001@gmail.com",
-            recipient_list=[employee.email for employee in employees],
-            fail_silently=False,
-        )
+def notify_employees_on_tasks_creation(sender, instance, action, **kwargs):
+    if action == 'post_add':
+        users = instance.assigned_to.all()
+        for user in users:
+            # Get user's full name or username
+            user_name = user.get_full_name() if user.get_full_name() else user.username
+            print(f"Notification: Task '{instance.title}' has been assigned to {user_name} ({user.email})")
+
+        # Send email only if users have email addresses
+        recipient_emails = [user.email for user in users if user.email]
+
+        if recipient_emails:
+            send_mail(
+                subject=f"New Task Assigned: {instance.title}",
+                message=f"You have been assigned a new task: {instance.title}\nDescription: {instance.description}\nDue Date: {instance.due_date}",
+                from_email="rifatrizviofficial001@gmail.com",
+                recipient_list=recipient_emails,
+                fail_silently=False,
+            )
         
         
 @receiver(post_delete, sender=Task)

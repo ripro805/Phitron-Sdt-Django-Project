@@ -109,8 +109,8 @@
                         {% endif %}
                     </div>
                     <div class="flex -space-x-2">
-                      {% for emp in task.assigned_to.all %}
-                       <div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs">{{emp.name|slice:":2"}}</div>
+                      {% for user in task.assigned_to.all %}
+                       <div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs">{% if user.first_name %}{{user.first_name|slice:":2"}}{% else %}{{user.username|slice:":2"}}{% endif %}</div>
                       {% endfor %}
                     </div>
                     <div class="text-sm text-gray-500">{{ task.created_at|timesince }}</div>
