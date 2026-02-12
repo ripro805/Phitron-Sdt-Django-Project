@@ -1,96 +1,106 @@
-{% extends "dashboard/dashboard.html" %}
-{% block title %}Employee Dashboard{% endblock title %}
+{% extends "dashboard/dashboard_base.html" %}
+
+{% block dashboard_title %}Employee Dashboard{% endblock %}
+
+{% block dashboard_header %}Employee Dashboard{% endblock %}
+
+{% block stats_cards %}
+    <!-- Total Tasks Card -->
+    <div class="bg-blue-50 p-6 rounded-lg shadow">
+        <h3 class="text-blue-600 text-sm font-semibold uppercase tracking-wide">Total Tasks</h3>
+        <p class="text-3xl font-bold text-blue-700">{{ task_counts.total }}</p>
+    </div>
+    
+    <!-- Pending Tasks Card -->
+    <div class="bg-yellow-50 p-6 rounded-lg shadow">
+        <h3 class="text-yellow-600 text-sm font-semibold uppercase tracking-wide">Pending</h3>
+        <p class="text-3xl font-bold text-yellow-700">{{ task_counts.pending }}</p>
+    </div>
+    
+    <!-- In Progress Tasks Card -->
+    <div class="bg-green-50 p-6 rounded-lg shadow">
+        <h3 class="text-green-600 text-sm font-semibold uppercase tracking-wide">In Progress</h3>
+        <p class="text-3xl font-bold text-green-700">{{ task_counts.in_progress }}</p>
+    </div>
+    
+    <!-- Completed Tasks Card -->
+    <div class="bg-purple-50 p-6 rounded-lg shadow">
+        <h3 class="text-purple-600 text-sm font-semibold uppercase tracking-wide">Completed</h3>
+        <p class="text-3xl font-bold text-purple-700">{{ task_counts.completed }}</p>
+    </div>
+{% endblock %}
+
 {% block tasks %}
+    {% if message %}
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+            <p class="font-bold">Notice:</p>
+            <p>{{ message }}</p>
+        </div>
+    {% endif %}
 
-{% if message %}
-  <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
-      <p class="font-bold">Notice:</p>
-      <p>{{ message }}</p>
-  </div>
-{% endif %}
-
-<!-- Task Statistics Cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-  <div class="bg-blue-50 p-6 rounded-lg shadow">
-      <h3 class="text-blue-600 text-sm font-semibold uppercase tracking-wide">Total Tasks</h3>
-      <p class="text-3xl font-bold text-blue-700">{{ task_counts.total }}</p>
-  </div>
-  <div class="bg-yellow-50 p-6 rounded-lg shadow">
-      <h3 class="text-yellow-600 text-sm font-semibold uppercase tracking-wide">Pending</h3>
-      <p class="text-3xl font-bold text-yellow-700">{{ task_counts.pending }}</p>
-  </div>
-  <div class="bg-green-50 p-6 rounded-lg shadow">
-      <h3 class="text-green-600 text-sm font-semibold uppercase tracking-wide">In Progress</h3>
-      <p class="text-3xl font-bold text-green-700">{{ task_counts.in_progress }}</p>
-  </div>
-  <div class="bg-purple-50 p-6 rounded-lg shadow">
-      <h3 class="text-purple-600 text-sm font-semibold uppercase tracking-wide">Completed</h3>
-      <p class="text-3xl font-bold text-purple-700">{{ task_counts.completed }}</p>
-  </div>
-</div>
-
-<div class="bg-white p-6 rounded-lg shadow">
-  <h2 class="text-2xl font-bold mb-4">My Assigned Tasks</h2>
-  
-  {% if my_tasks %}
-  <div class="overflow-x-auto">
-    <table class="w-full">
-      <thead>
-        <tr class="text-left text-gray-500 border-b">
-          <th class="pb-3">TASK TITLE</th>
-          <th class="pb-3">STATUS</th>
-          <th class="pb-3">PRIORITY</th>
-          <th class="pb-3">DUE DATE</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        {% for task in my_tasks %}
-        <tr class="hover:bg-gray-50">
-          <td class="py-4">
-            <div class="flex items-center">
-              <span class="w-2 h-2 
-                {% if task.status == 'COMPLETED' %}bg-green-500
-                {% elif task.status == 'IN_PROGRESS' %}bg-yellow-500  
-                {% else %}bg-blue-500{% endif %}
-                rounded-full mr-3"></span>
-              <div>
-                <div class="font-medium text-gray-900">{{ task.title }}</div>
-                <div class="text-sm text-gray-500">
-                  {% if task.detail.description %}{{ task.detail.description|truncatechars:50 }}{% endif %}
-                </div>
-              </div>
-            </div>
-          </td>
-          <td class="py-4">
-            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-              {% if task.status == 'COMPLETED' %}bg-green-100 text-green-800
-              {% elif task.status == 'IN_PROGRESS' %}bg-yellow-100 text-yellow-800
-              {% else %}bg-blue-100 text-blue-800{% endif %}">
-              {{ task.get_status_display }}
-            </span>
-          </td>
-          <td class="py-4">
-            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-              {% if task.detail.priority == 'HIGH' %}bg-red-100 text-red-800
-              {% elif task.detail.priority == 'MEDIUM' %}bg-orange-100 text-orange-800
-              {% else %}bg-green-100 text-green-800{% endif %}">
-              {% if task.detail.priority %}{{ task.detail.get_priority_display }}{% else %}Normal{% endif %}
-            </span>
-          </td>
-          <td class="py-4 text-sm text-gray-500">
-            {% if task.detail.due_date %}{{ task.detail.due_date|date:"M d, Y" }}{% else %}Not set{% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-  <div class="text-center py-12">
-    <h3 class="mt-4 text-lg font-medium text-gray-900">No tasks assigned</h3>
-    <p class="mt-2 text-gray-500">You don't have any tasks assigned to you yet.</p>
-  </div>
-  {% endif %}
-</div>
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4">My Assigned Tasks</h2>
+        
+        {% if my_tasks %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-gray-500 border-b">
+                        <th class="pb-3">TASK TITLE</th>
+                        <th class="pb-3">STATUS</th>
+                        <th class="pb-3">PRIORITY</th>
+                        <th class="pb-3">DUE DATE</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for task in my_tasks %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-4">
+                            <div class="flex items-center">
+                                <span class="w-2 h-2 
+                                    {% if task.status == 'COMPLETED' %}bg-green-500
+                                    {% elif task.status == 'IN_PROGRESS' %}bg-yellow-500  
+                                    {% else %}bg-blue-500{% endif %}
+                                    rounded-full mr-3"></span>
+                                <div>
+                                    <div class="font-medium text-gray-900">{{ task.title }}</div>
+                                    <div class="text-sm text-gray-500">
+                                        {% if task.detail.description %}{{ task.detail.description|truncatechars:50 }}{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                {% if task.status == 'COMPLETED' %}bg-green-100 text-green-800
+                                {% elif task.status == 'IN_PROGRESS' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ task.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="py-4">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                {% if task.detail.priority == 'HIGH' %}bg-red-100 text-red-800
+                                {% elif task.detail.priority == 'MEDIUM' %}bg-orange-100 text-orange-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {% if task.detail.priority %}{{ task.detail.get_priority_display }}{% else %}Normal{% endif %}
+                            </span>
+                        </td>
+                        <td class="py-4 text-sm text-gray-500">
+                            {% if task.detail.due_date %}{{ task.detail.due_date|date:"M d, Y" }}{% else %}Not set{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <h3 class="mt-4 text-lg font-medium text-gray-900">No tasks assigned</h3>
+            <p class="mt-2 text-gray-500">You don't have any tasks assigned to you yet.</p>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}
 
 {% endblock tasks %}

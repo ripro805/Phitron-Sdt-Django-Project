@@ -46,14 +46,9 @@ def sign_in(request):
 
 @login_required           
 def sign_out(request):
-    form = StyledAuthenticationForm()
-    if request.method == 'POST':
-        form = StyledAuthenticationForm(request=request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            auth_login(request, user)
-            return redirect('home')
-    return render(request, 'registration/login.html', {'form': form})
+    logout(request)
+    messages.success(request, 'You have been successfully logged out.')
+    return redirect('home')
 
 
 def activate_account(request, uid, token):
