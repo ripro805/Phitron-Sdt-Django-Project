@@ -6,7 +6,17 @@ from datetime import date
 from django.db.models import Q, Count
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test,permission_required
+from django.views import View
 
+
+#Class based view for reuse example
+class GreetingView(View):
+    greetings = "Hello, welcome to the Task Management System!"
+    def get(self, request):
+        return HttpResponse(self.greetings)
+    
+class HiGreetingView(GreetingView):
+    greetings = "Hi there! This is a personalized greeting from HiGreetingView."   
 # Create your views here.
 
 def is_manager(user):
