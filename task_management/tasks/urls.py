@@ -1,14 +1,16 @@
 from django.urls import path
-from tasks.views import manager_dashboard, employee_dashboard, test, create_task, view_tasks, update_task, delete_task, view_task_detail, GreetingView, HiGreetingView
+from tasks.views import (
+    ManagerDashboardView, EmployeeDashboardView, TestView, CreateTaskView, ViewTasksView, ViewTaskDetailView, UpdateTaskView, DeleteTaskView, GreetingView, HiGreetingView
+)
 
 urlpatterns = [
-    path('manager-dashboard/', manager_dashboard,name='manager_dashboard'),
-    path('employee-dashboard/', employee_dashboard, name='employee_dashboard'), 
-    path('test/', test),
-    path('create-task/', create_task,name='create-task'),
-    path('view-tasks/', view_tasks, name='view_tasks'),
-    path('view-tasks/<int:id>/details/', view_task_detail, name='view_task_detail'),
-    path('update-task/<int:id>/', update_task, name='update-task'),
-    path('delete-task/<int:id>/', delete_task, name='delete-task'),
+    path('manager-dashboard/', ManagerDashboardView.as_view(), name='manager_dashboard'),
+    path('employee-dashboard/', EmployeeDashboardView.as_view(), name='employee_dashboard'),
+    path('test/', TestView.as_view()),
+    path('create-task/', CreateTaskView.as_view(), name='create-task'),
+    path('view-tasks/', ViewTasksView.as_view(), name='view_tasks'),
+    path('view-tasks/<int:id>/details/', ViewTaskDetailView.as_view(), name='view_task_detail'),
+    path('update-task/<int:id>/', UpdateTaskView.as_view(), name='update-task'),
+    path('delete-task/<int:id>/', DeleteTaskView.as_view(), name='delete-task'),
     path('greetings/', HiGreetingView.as_view(), name='greetings'),
 ]
