@@ -1,15 +1,18 @@
 
-from django.shortcuts import render,redirect
+
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import TaskForm, TaskModelForm,TaskDetailModelForm
-from tasks.models import Employee, Task,TaskDetail, Project
-from datetime import date
-from django.db.models import Q, Count
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test,permission_required
 from django.views import View
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
+from django.db.models import Q, Count
+from django.contrib import messages
+from .forms import TaskForm, TaskModelForm, TaskDetailModelForm
+from tasks.models import Employee, Task, TaskDetail, Project
+from datetime import date
 
 #Class based view for reuse example
 class GreetingView(View):
@@ -243,30 +246,24 @@ class ViewTasksView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context['context_message'] = context_message
         return context
 
-class ViewTaskDetailView(LoginRequiredMixin, PermissionRequiredMixin, View):
+
+from django.views.generic.detail import DetailView
+
+class ViewTaskDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+    model = Task
+    template_name = 'task_detail.html'
+    context_object_name = 'task'
     login_url = 'login'
     redirect_field_name = 'next'
     permission_required = 'tasks.view_task'
     raise_exception = True
-    def get(self, request, id):
-        task = Task.objects.select_related('detail', 'project').prefetch_related('assigned_to__groups').get(id=id)
-        team_members = []
-        for user in task.assigned_to.all():
-            groups = user.groups.all()
-            role = groups[0].name if groups else 'Team Member'
-            team_members.append({
-                'user': user,
-                'role': role,
-                'groups': [g.name for g in groups],
-            })
-        context = self.get_context_data()
-        context['task'] = task
-        context['team_members'] = team_members
-        context['status_choices'] = Task.STATUS_CHOICES
-        return render(request, 'task_detail.html', context)
+
+    def get_queryset(self):
+        return Task.objects.select_related('detail', 'project').prefetch_related('assigned_to__groups')
+
     def get_context_data(self, **kwargs):
-        context = {}
-        task = Task.objects.select_related('detail', 'project').prefetch_related('assigned_to__groups').get(id=kwargs.get('id'))
+        context = super().get_context_data(**kwargs)
+        task = self.object
         team_members = []
         for user in task.assigned_to.all():
             groups = user.groups.all()
@@ -276,7 +273,6 @@ class ViewTaskDetailView(LoginRequiredMixin, PermissionRequiredMixin, View):
                 'role': role,
                 'groups': [g.name for g in groups],
             })
-        context['task'] = task
         context['team_members'] = team_members
         context['status_choices'] = Task.STATUS_CHOICES
         return context
