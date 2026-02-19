@@ -3,8 +3,8 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views import View
-from django.views.generic.list import ListView
-from django.views.generic.detail import DetailView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
@@ -122,24 +122,27 @@ class TestView(View):
         }
         return render(request, 'test.html', context)
 
-class CreateTaskView(LoginRequiredMixin, PermissionRequiredMixin, View):
+
+
+
+class CreateTaskView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Task
+    form_class = TaskModelForm
+    template_name = 'task_form.html'
     login_url = 'login'
     redirect_field_name = 'next'
     permission_required = 'tasks.add_task'
     raise_exception = True
-    def get(self, request):
-        task_form = TaskModelForm()
-        task_detail_form = TaskDetailModelForm()
-        context = self.get_context_data()
-        return render(request, 'task_form.html', context)
+
     def get_context_data(self, **kwargs):
-        context = {}
-        context['task_form'] = TaskModelForm()
+        context = super().get_context_data(**kwargs)
+        context['task_form'] = self.get_form()
         context['task_detail_form'] = TaskDetailModelForm()
         return context
 
-    def post(self, request):
-        task_form = TaskModelForm(request.POST)
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        task_form = self.get_form()
         task_detail_form = TaskDetailModelForm(request.POST, request.FILES)
         if task_form.is_valid() and task_detail_form.is_valid():
             task = task_form.save()
@@ -148,50 +151,40 @@ class CreateTaskView(LoginRequiredMixin, PermissionRequiredMixin, View):
             task_detail.save()
             messages.success(request, 'Task created successfully!')
             return redirect('create-task')
-        return render(request, 'task_form.html', {'task_form': task_form, 'task_detail_form': task_detail_form})
+        return self.render_to_response(self.get_context_data(form=task_form, task_detail_form=task_detail_form))
 
-class UpdateTaskView(LoginRequiredMixin, PermissionRequiredMixin, View):
+
+
+class UpdateTaskView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Task
+    form_class = TaskModelForm
+    template_name = 'task_form.html'
+    context_object_name = 'task'
     login_url = 'login'
     redirect_field_name = 'next'
     permission_required = 'tasks.change_task'
     raise_exception = True
-    def get(self, request, id):
-        task = Task.objects.get(id=id)
-        try:
-            task_detail = task.detail
-            task_detail_form = TaskDetailModelForm(instance=task_detail)
-        except TaskDetail.DoesNotExist:
-            task_detail = None
-            task_detail_form = TaskDetailModelForm()
-        task_form = TaskModelForm(instance=task)
-        context = self.get_context_data()
-        context['task_form'] = task_form
-        context['task_detail_form'] = task_detail_form
-        return render(request, 'task_form.html', context)
+    pk_url_kwarg = 'id'
+
     def get_context_data(self, **kwargs):
-        context = {}
-        task = Task.objects.get(id=kwargs.get('id'))
+        context = super().get_context_data(**kwargs)
+        task = self.object
         try:
             task_detail = task.detail
             task_detail_form = TaskDetailModelForm(instance=task_detail)
         except TaskDetail.DoesNotExist:
-            task_detail = None
             task_detail_form = TaskDetailModelForm()
-        task_form = TaskModelForm(instance=task)
-        context['task_form'] = task_form
+        context['task_form'] = self.get_form()
         context['task_detail_form'] = task_detail_form
         return context
 
-    def post(self, request, id):
-        task = Task.objects.get(id=id)
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        task_form = self.get_form()
         try:
-            task_detail = task.detail
-        except TaskDetail.DoesNotExist:
-            task_detail = None
-        task_form = TaskModelForm(request.POST, instance=task)
-        if task_detail:
+            task_detail = self.object.detail
             task_detail_form = TaskDetailModelForm(request.POST, request.FILES, instance=task_detail)
-        else:
+        except TaskDetail.DoesNotExist:
             task_detail_form = TaskDetailModelForm(request.POST, request.FILES)
         if task_form.is_valid() and task_detail_form.is_valid():
             task = task_form.save()
@@ -200,12 +193,8 @@ class UpdateTaskView(LoginRequiredMixin, PermissionRequiredMixin, View):
             task_detail.save()
             messages.success(request, 'Task updated successfully!')
             return redirect('manager_dashboard')
-        return render(request, 'task_form.html', {
-            'task_form': task_form,
-            'task_detail_form': task_detail_form
-        })
+        return self.render_to_response(self.get_context_data(form=task_form, task_detail_form=task_detail_form))
 
-from django.views.generic.list import ListView
 
 class ViewTasksView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Task
@@ -247,7 +236,6 @@ class ViewTasksView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         return context
 
 
-from django.views.generic.detail import DetailView
 
 class ViewTaskDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = Task
@@ -307,24 +295,17 @@ class ViewTaskDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView
         }
         return render(request, 'task_detail.html', context)
 
-class DeleteTaskView(LoginRequiredMixin, PermissionRequiredMixin, View):
+class DeleteTaskView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Task
+    template_name = 'confirm_delete.html'
+    context_object_name = 'task'
     login_url = 'login'
     redirect_field_name = 'next'
     permission_required = 'tasks.delete_task'
     raise_exception = True
-    def get(self, request, id):
-        task = Task.objects.get(id=id)
-        context = self.get_context_data()
-        context['task'] = task
-        return render(request, 'confirm_delete.html', context)
-    def get_context_data(self, **kwargs):
-        context = {}
-        task = Task.objects.get(id=kwargs.get('id'))
-        context['task'] = task
-        return context
+    pk_url_kwarg = 'id'
+    success_url = '/tasks/manager-dashboard/'
 
-    def post(self, request, id):
-        task = Task.objects.get(id=id)
-        task.delete()
+    def delete(self, request, *args, **kwargs):
         messages.success(request, 'Task deleted successfully!')
-        return redirect('manager-dashboard')
+        return super().delete(request, *args, **kwargs)
