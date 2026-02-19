@@ -17,6 +17,8 @@
 					<a href="{% url 'create_group' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">Create Group</a>
 					<a href="{% url 'admin_dashboard' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">User Management</a>
 					<a href="{% url 'create-task' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">Create Task</a>
+					<a href="{% url 'view_tasks' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">Tasks</a>
+
 				{% elif group.name == "Manager" %}
 					<a href="{% url 'view_tasks' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">All Tasks</a>
 					<a href="{% url 'create-task' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">Create Task</a>
@@ -42,6 +44,8 @@
 							<a href="{% url 'group_list' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Groups</a>
 							<a href="{% url 'create_group' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Create Group</a>
 							<a href="{% url 'create-task' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Create Task</a>
+							<a href="{% url 'view_tasks' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Tasks</a>
+
 						{% elif group.name == "Manager" %}
 							<a href="{% url 'manager_dashboard' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Manager Panel</a>
 							<a href="{% url 'create-task' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Create Task</a>
@@ -78,6 +82,8 @@
 				<a href="{% url 'admin_dashboard' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">User Management</a>
 				<a href="{% url 'group_list' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Groups</a>
 				<a href="{% url 'create_group' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Create Group</a>
+				<a href="{% url 'create-task' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Create Task</a>
+				<a href="{% url 'view_tasks' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Tasks</a>
 				<a href="{% url 'create-task' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Create Task</a>
 			{% elif group.name == "Manager" %}
 				<a href="{% url 'view_tasks' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">All Tasks</a>

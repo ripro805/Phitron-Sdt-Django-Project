@@ -53,7 +53,7 @@ class ManagerDashboardView(LoginRequiredMixin, View):
         context['counts'] = counts
         return render(request, 'dashboard/manager_dashboard.html', context)
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = {}
         type = self.request.GET.get('type', 'all')
         counts = Task.objects.aggregate(
             total=Count('id'),
@@ -95,7 +95,7 @@ class EmployeeDashboardView(LoginRequiredMixin, View):
         context['task_counts'] = task_counts
         return render(request, 'dashboard/employee_dashboard.html', context)
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = {}
         my_tasks = Task.objects.filter(assigned_to=self.request.user).select_related('detail')
         task_counts = {
             'total': my_tasks.count(),
@@ -118,6 +118,8 @@ class TestView(View):
             "count": count
         }
         return render(request, 'test.html', context)
+
+class CreateTaskView(LoginRequiredMixin, PermissionRequiredMixin, View):
     login_url = 'login'
     redirect_field_name = 'next'
     permission_required = 'tasks.add_task'
@@ -128,7 +130,7 @@ class TestView(View):
         context = self.get_context_data()
         return render(request, 'task_form.html', context)
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = {}
         context['task_form'] = TaskModelForm()
         context['task_detail_form'] = TaskDetailModelForm()
         return context
@@ -145,6 +147,7 @@ class TestView(View):
             return redirect('create-task')
         return render(request, 'task_form.html', {'task_form': task_form, 'task_detail_form': task_detail_form})
 
+class UpdateTaskView(LoginRequiredMixin, PermissionRequiredMixin, View):
     login_url = 'login'
     redirect_field_name = 'next'
     permission_required = 'tasks.change_task'
@@ -163,7 +166,7 @@ class TestView(View):
         context['task_detail_form'] = task_detail_form
         return render(request, 'task_form.html', context)
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = {}
         task = Task.objects.get(id=kwargs.get('id'))
         try:
             task_detail = task.detail
@@ -198,57 +201,49 @@ class TestView(View):
             'task_form': task_form,
             'task_detail_form': task_detail_form
         })
+
+from django.views.generic.list import ListView
+
+class ViewTasksView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Task
+    template_name = 'show_tasks.html'
+    context_object_name = 'tasks'
     login_url = 'login'
     redirect_field_name = 'next'
     permission_required = 'tasks.view_task'
     raise_exception = True
-    def get(self, request):
-        user = request.user
+
+    def get_queryset(self):
+        user = self.request.user
         if user.groups.filter(name='Admin').exists() or user.is_superuser:
-            projects = Project.objects.annotate(num_task=Count('task')).order_by('num_task')
-            tasks = Task.objects.all().select_related('detail')
-            context_message = "All Tasks (Admin View)"
+            return Task.objects.all().select_related('detail')
         elif user.groups.filter(name='Manager').exists():
-            projects = Project.objects.annotate(num_task=Count('task')).order_by('num_task')
-            tasks = Task.objects.all().select_related('detail')
-            context_message = "All Tasks (Manager View)"
+            return Task.objects.all().select_related('detail')
         elif user.groups.filter(name='Employee').exists():
-            projects = Project.objects.filter(task__assigned_to=user).annotate(num_task=Count('task')).order_by('num_task').distinct()
-            tasks = Task.objects.filter(assigned_to=user).select_related('detail')
-            context_message = "My Assigned Tasks"
+            return Task.objects.filter(assigned_to=user).select_related('detail')
         else:
-            projects = Project.objects.none()
-            tasks = Task.objects.none()
-            context_message = "No tasks available"
-        context = self.get_context_data()
-        context['projects'] = projects
-        context['tasks'] = tasks
-        context['context_message'] = context_message
-        return render(request, 'show_tasks.html', context)
+            return Task.objects.none()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         if user.groups.filter(name='Admin').exists() or user.is_superuser:
             projects = Project.objects.annotate(num_task=Count('task')).order_by('num_task')
-            tasks = Task.objects.all().select_related('detail')
             context_message = "All Tasks (Admin View)"
         elif user.groups.filter(name='Manager').exists():
             projects = Project.objects.annotate(num_task=Count('task')).order_by('num_task')
-            tasks = Task.objects.all().select_related('detail')
             context_message = "All Tasks (Manager View)"
         elif user.groups.filter(name='Employee').exists():
             projects = Project.objects.filter(task__assigned_to=user).annotate(num_task=Count('task')).order_by('num_task').distinct()
-            tasks = Task.objects.filter(assigned_to=user).select_related('detail')
             context_message = "My Assigned Tasks"
         else:
             projects = Project.objects.none()
-            tasks = Task.objects.none()
             context_message = "No tasks available"
         context['projects'] = projects
-        context['tasks'] = tasks
         context['context_message'] = context_message
         return context
 
+class ViewTaskDetailView(LoginRequiredMixin, PermissionRequiredMixin, View):
     login_url = 'login'
     redirect_field_name = 'next'
     permission_required = 'tasks.view_task'
@@ -270,7 +265,7 @@ class TestView(View):
         context['status_choices'] = Task.STATUS_CHOICES
         return render(request, 'task_detail.html', context)
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = {}
         task = Task.objects.select_related('detail', 'project').prefetch_related('assigned_to__groups').get(id=kwargs.get('id'))
         team_members = []
         for user in task.assigned_to.all():
@@ -316,6 +311,7 @@ class TestView(View):
         }
         return render(request, 'task_detail.html', context)
 
+class DeleteTaskView(LoginRequiredMixin, PermissionRequiredMixin, View):
     login_url = 'login'
     redirect_field_name = 'next'
     permission_required = 'tasks.delete_task'
@@ -326,7 +322,7 @@ class TestView(View):
         context['task'] = task
         return render(request, 'confirm_delete.html', context)
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = {}
         task = Task.objects.get(id=kwargs.get('id'))
         context['task'] = task
         return context
