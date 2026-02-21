@@ -4,7 +4,8 @@ from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.contrib.auth.forms import UserCreationForm
 from users.forms import RegisterForm, CustomizeRegisterForm,LoginForm, AssignRoleForm,CreateGroupForm, CustomPasswordChangeForm, CustomPasswordResetForm, CustomSetPasswordForm, EditProfileForm
-from django.contrib.auth.models import User, Group
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as auth_login , logout
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -110,6 +111,7 @@ def activate_account(request, uidb64, token):
     from django.utils.encoding import force_str
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
+        User = get_user_model()
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         messages.error(request, "Invalid activation link.")
@@ -127,6 +129,7 @@ def activate_account(request, uidb64, token):
 
 @user_passes_test(is_admin,login_url='sign_in')    
 def admin_dashboard(request):
+    User = get_user_model()
     users = User.objects.only('id', 'first_name', 'last_name', 'email').prefetch_related(
         Prefetch('groups', queryset=Group.objects.only('id', 'name'))
     ).order_by('-date_joined')
@@ -138,6 +141,7 @@ def admin_dashboard(request):
     return render(request, 'admin/admin_dashboard.html', {'users': users})    
 @user_passes_test(is_admin,login_url='no_permission')    
 def assign_role(request, user_id):
+    User = get_user_model()
     user = User.objects.prefetch_related('groups').get(id=user_id)
     form = AssignRoleForm()
     if request.method == 'POST':
@@ -172,12 +176,12 @@ class ProfileView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        try:
-            profile = user.userprofile
-        except Exception:
-            profile = None
+        # Profile fields are on the custom user model
         context['user'] = user
-        context['profile'] = profile
+        context['profile'] = {
+            'bio': getattr(user, 'bio', ''),
+            'profile_picture': getattr(user, 'profile_picture', None),
+        }
         context['username'] = user.username
         context['email'] = user.email
         context['name'] = user.get_full_name()
@@ -194,15 +198,13 @@ class EditProfileView(TemplateView):
     template_name = 'accounts/edit_profile.html'
 
     def get(self, request, *args, **kwargs):
-        profile = request.user.userprofile
-        form = EditProfileForm(instance=profile)
-        return render(request, self.template_name, {'form': form, 'profile': profile})
+        form = EditProfileForm(instance=request.user)
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request, *args, **kwargs):
-        profile = request.user.userprofile
-        form = EditProfileForm(request.POST, request.FILES, instance=profile)
+        form = EditProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('profile')
-        return render(request, self.template_name, {'form': form, 'profile': profile})
+        return render(request, self.template_name, {'form': form})

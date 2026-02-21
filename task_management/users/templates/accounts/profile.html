@@ -36,7 +36,19 @@
         <div class="flex items-center gap-3">
           <div class="relative group">
             <button class="flex items-center focus:outline-none" id="user-menu-btn">
-              <img src="/static/images/banner/7463554.jpg" alt="User Avatar" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+              {% if user.profile_picture %}
+                  <img src="{{ user.profile_picture.url }}" alt="User Avatar" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+              {% else %}
+                  {% if user.role == 'Admin' %}
+                      <img src="/static/images/default_admin.png" alt="Admin Default" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+                  {% elif user.role == 'Manager' %}
+                      <img src="/static/images/default_manager.png" alt="Manager Default" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+                  {% elif user.role == 'Employee' %}
+                      <img src="/static/images/default_employee.png" alt="Employee Default" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+                  {% else %}
+                      <img src="https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png" alt="User Avatar" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+                  {% endif %}
+              {% endif %}
               <svg class="ml-2 h-5 w-5 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div id="user-menu" class="hidden absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-100">
@@ -85,22 +97,22 @@
 
         <div class="bg-white shadow-md rounded-lg p-6">
           <div class="flex items-center mb-6">
-            {% if profile.profile_picture %}
-            <img
-              src="{{ profile.profile_picture.url }}"
-              alt="User Avatar"
-              class="w-24 h-24 rounded-full object-cover mr-6"
-            />
+            {% if user.profile_picture %}
+              <img src="{{ user.profile_picture.url }}" alt="User Avatar" class="w-24 h-24 rounded-full object-cover mr-6" />
             {% else %}
-            <img
-              src="https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png"
-              alt="User Avatar"
-              class="w-24 h-24 rounded-full object-cover mr-6"
-            />
+              {% if user.role == 'Admin' %}
+                <img src="/static/images/default_admin.png" alt="Admin Default" class="w-24 h-24 rounded-full object-cover mr-6" />
+              {% elif user.role == 'Manager' %}
+                <img src="/static/images/default_manager.png" alt="Manager Default" class="w-24 h-24 rounded-full object-cover mr-6" />
+              {% elif user.role == 'Employee' %}
+                <img src="/static/images/default_employee.png" alt="Employee Default" class="w-24 h-24 rounded-full object-cover mr-6" />
+              {% else %}
+                <img src="https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png" alt="User Avatar" class="w-24 h-24 rounded-full object-cover mr-6" />
+              {% endif %}
             {% endif %}
             <div>
               <h2 class="text-2xl font-semibold text-gray-800">{{ user.get_full_name|default:user.username }}</h2>
-              <p class="text-gray-600">{{ user.profile.job_title|default:'N/A' }}</p>
+              <p class="text-gray-600">{{ user.email }}</p>
             </div>
           </div>
 
@@ -110,7 +122,7 @@
                 Personal Information
               </h3>
               <p class="text-gray-600">
-                <span class="font-medium">Email:</span> {{email}}
+                <span class="font-medium">Email:</span> {{ user.email }}
               </p>
               <p class="text-gray-600">
                 <span class="font-medium">Username:</span> {{ user.username }}
@@ -135,7 +147,7 @@
           <div class="mt-6">
             <h3 class="text-lg font-semibold text-gray-700 mb-2">Bio</h3>
             <p class="text-gray-600">
-              {{ profile.bio|default:'No bio added yet.' }}
+              {{ user.bio|default:'No bio added yet.' }}
             </p>
           </div>
         </div>

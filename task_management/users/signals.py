@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User, Group
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -8,7 +9,8 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
-from .models import UserProfile
+
+User = get_user_model()
 
 
 @receiver(post_save, sender=User)
@@ -48,10 +50,4 @@ def assign_role(sender, instance, created, **kwargs):
         instance.groups.add(user_group)
         instance.save() 
 
-@receiver(post_save, sender=User)
-def create_or_update_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
-    else:
-        if hasattr(instance, 'userprofile'):
-            instance.userprofile.save()
+# UserProfile model removed; profile fields are on the custom user model itself.
