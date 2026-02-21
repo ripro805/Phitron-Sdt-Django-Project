@@ -5,7 +5,9 @@ def dashboard_redirect(request):
     user = request.user
     if not user.is_authenticated:
         return redirect('login')
-    if user.groups.filter(name='Manager').exists():
+    if user.groups.filter(name='Admin').exists():
+        return redirect('admin_dashboard')
+    elif user.groups.filter(name='Manager').exists():
         return redirect('manager_dashboard')
     elif user.groups.filter(name='Employee').exists():
         return redirect('employee_dashboard')
