@@ -9,4 +9,9 @@ def home(request):
     return render(request, 'home.html', context)
 
 def no_permission(request):
+    if not request.user.is_authenticated:
+        from django.urls import reverse
+        login_url = reverse('sign_in')
+        next_url = request.get_full_path()
+        return redirect(f'{login_url}?next={next_url}')
     return render(request, 'no_permission.html')

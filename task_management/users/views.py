@@ -46,6 +46,9 @@ def sign_in(request):
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
     authentication_form = LoginForm
+    def get_success_url(self):
+        next_url=self.request.GET.get('next')
+        return next_url if next_url else super().get_success_url()
 @login_required           
 def sign_out(request):
     logout(request)
@@ -70,7 +73,7 @@ def activate_account(request, uid, token):
         return redirect('sign_in')
 
 
-@user_passes_test(is_admin,login_url='no_permission')    
+@user_passes_test(is_admin,login_url='sign_in')    
 def admin_dashboard(request):
     users = User.objects.only('id', 'first_name', 'last_name', 'email').prefetch_related(
         Prefetch('groups', queryset=Group.objects.only('id', 'name'))

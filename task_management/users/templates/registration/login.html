@@ -80,6 +80,14 @@
                 <span class="px-2 bg-white text-gray-500">or</span>
             </div>
         </div>
+        <!-- Next Link -->
+        {% if request.GET.next %}
+        <div class="text-center mt-4">
+            <a href="{{ request.GET.next }}" class="text-blue-600 hover:text-blue-800 font-semibold hover:underline transition">
+                Back to previous page
+            </a>
+        </div>
+        {% endif %}
         <!-- Register Link -->
         <div class="text-center">
             <p class="text-gray-600 text-sm">

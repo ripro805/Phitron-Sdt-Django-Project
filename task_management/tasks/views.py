@@ -33,7 +33,7 @@ def is_employee(user):
 class ManagerDashboardView(LoginRequiredMixin, View):
     login_url = 'login'
     redirect_field_name = 'next'
-    @method_decorator(user_passes_test(is_manager, login_url='/users/sign-in/'), name='dispatch')
+    @method_decorator(user_passes_test(is_manager, login_url='sign_in'), name='dispatch')
     def get(self, request):
         type = request.GET.get('type', 'all')
         counts = Task.objects.aggregate(
@@ -80,7 +80,7 @@ class ManagerDashboardView(LoginRequiredMixin, View):
 class EmployeeDashboardView(LoginRequiredMixin, View):
     login_url = 'login'
     redirect_field_name = 'next'
-    @method_decorator(user_passes_test(is_employee, login_url='/users/sign-in/'), name='dispatch')
+    @method_decorator(user_passes_test(is_employee, login_url='sign_in'), name='dispatch')
     def get(self, request):
         my_tasks = Task.objects.filter(assigned_to=request.user).select_related('detail')
         task_counts = {
@@ -129,10 +129,9 @@ class CreateTaskView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Task
     form_class = TaskModelForm
     template_name = 'task_form.html'
-    login_url = 'login'
+    login_url = 'sign_in'
     redirect_field_name = 'next'
     permission_required = 'tasks.add_task'
-    raise_exception = True
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -160,10 +159,9 @@ class UpdateTaskView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     form_class = TaskModelForm
     template_name = 'task_form.html'
     context_object_name = 'task'
-    login_url = 'login'
+    login_url = 'sign_in'
     redirect_field_name = 'next'
     permission_required = 'tasks.change_task'
-    raise_exception = True
     pk_url_kwarg = 'id'
 
     def get_context_data(self, **kwargs):
@@ -200,10 +198,9 @@ class ViewTasksView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Task
     template_name = 'show_tasks.html'
     context_object_name = 'tasks'
-    login_url = 'login'
+    login_url = 'sign_in'
     redirect_field_name = 'next'
     permission_required = 'tasks.view_task'
-    raise_exception = True
 
     def get_queryset(self):
         user = self.request.user
@@ -241,10 +238,9 @@ class ViewTaskDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView
     model = Task
     template_name = 'task_detail.html'
     context_object_name = 'task'
-    login_url = 'login'
+    login_url = 'sign_in'
     redirect_field_name = 'next'
     permission_required = 'tasks.view_task'
-    raise_exception = True
 
     def get_queryset(self):
         return Task.objects.select_related('detail', 'project').prefetch_related('assigned_to__groups')
@@ -299,10 +295,9 @@ class DeleteTaskView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Task
     template_name = 'confirm_delete.html'
     context_object_name = 'task'
-    login_url = 'login'
+    login_url = 'sign_in'
     redirect_field_name = 'next'
     permission_required = 'tasks.delete_task'
-    raise_exception = True
     pk_url_kwarg = 'id'
     success_url = '/tasks/manager-dashboard/'
 
