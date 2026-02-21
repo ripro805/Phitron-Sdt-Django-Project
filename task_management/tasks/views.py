@@ -33,7 +33,7 @@ def is_employee(user):
 class ManagerDashboardView(LoginRequiredMixin, View):
     login_url = 'login'
     redirect_field_name = 'next'
-    @method_decorator(user_passes_test(is_manager, login_url='no_permission'), name='dispatch')
+    @method_decorator(user_passes_test(is_manager, login_url='/users/sign-in/'), name='dispatch')
     def get(self, request):
         type = request.GET.get('type', 'all')
         counts = Task.objects.aggregate(
@@ -80,7 +80,7 @@ class ManagerDashboardView(LoginRequiredMixin, View):
 class EmployeeDashboardView(LoginRequiredMixin, View):
     login_url = 'login'
     redirect_field_name = 'next'
-    @method_decorator(user_passes_test(is_employee, login_url='no_permission'), name='dispatch')
+    @method_decorator(user_passes_test(is_employee, login_url='/users/sign-in/'), name='dispatch')
     def get(self, request):
         my_tasks = Task.objects.filter(assigned_to=request.user).select_related('detail')
         task_counts = {

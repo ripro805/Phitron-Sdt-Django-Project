@@ -9,7 +9,7 @@ from users.forms import StyledAuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Prefetch
-
+from django.contrib.auth.views import LoginView
 
 # Create your views here.
 
@@ -43,7 +43,9 @@ def sign_in(request):
            return redirect('home')
     return render(request, 'registration/login.html', {'form': form})
            
-
+class CustomLoginView(LoginView):
+    template_name = 'registration/login.html'
+    authentication_form = LoginForm
 @login_required           
 def sign_out(request):
     logout(request)
