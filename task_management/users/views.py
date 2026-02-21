@@ -3,8 +3,9 @@ from django.views.generic import TemplateView
 
 from django.shortcuts import render
 from django.contrib.auth.forms import UserCreationForm
-from users.forms import RegisterForm, CustomizeRegisterForm,LoginForm, AssignRoleForm,CreateGroupForm, CustomPasswordChangeForm, CustomPasswordResetForm, CustomSetPasswordForm
-from django.contrib.auth.models import User, Group
+from users.forms import RegisterForm, CustomizeRegisterForm,LoginForm, AssignRoleForm,CreateGroupForm, CustomPasswordChangeForm, CustomPasswordResetForm, CustomSetPasswordForm, EditProfileForm
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as auth_login , logout
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -26,22 +27,6 @@ from django.utils.html import strip_tags
 def is_admin(user):
     return user.groups.filter(name='Admin').exists() or user.is_superuser
 
-def send_activation_email(user, activation_link):
-    subject = 'Activate Your TaskPro Account'
-    html_content = render_to_string('accounts/activation_email.html', {
-        'activation_link': activation_link,
-        'year': 2026,
-    })
-    text_content = strip_tags(html_content)
-    email = EmailMultiAlternatives(
-        subject,
-        text_content,
-        'noreply@taskpro.com',
-        [user.email]
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-
 def sign_up(request):
     if request.method == 'GET':
         form = CustomizeRegisterForm()
@@ -51,16 +36,7 @@ def sign_up(request):
             user = form.save(commit=False)
             user.is_active = False
             user.save()
-            # Generate activation link
-            from django.contrib.sites.shortcuts import get_current_site
-            from django.urls import reverse
-            from django.utils.http import urlsafe_base64_encode
-            from django.utils.encoding import force_bytes
-            current_site = get_current_site(request)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = default_token_generator.make_token(user)
-            activation_link = f"http://{current_site.domain}{reverse('activate_account', args=[uid, token])}"
-            send_activation_email(user, activation_link)
+            # Activation email will be sent automatically by signal
             messages.success(request, "A confirmation email has been sent to your email address. Please activate your account.")
             return redirect('sign_in')
         else:
@@ -130,10 +106,14 @@ def sign_out(request):
     return redirect('home')
 
 
-def activate_account(request, uid, token):
+def activate_account(request, uidb64, token):
+    from django.utils.http import urlsafe_base64_decode
+    from django.utils.encoding import force_str
     try:
-        user = User.objects.get(id=uid)
-    except User.DoesNotExist:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        User = get_user_model()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         messages.error(request, "Invalid activation link.")
         return redirect('sign_in')
 
@@ -149,6 +129,7 @@ def activate_account(request, uid, token):
 
 @user_passes_test(is_admin,login_url='sign_in')    
 def admin_dashboard(request):
+    User = get_user_model()
     users = User.objects.only('id', 'first_name', 'last_name', 'email').prefetch_related(
         Prefetch('groups', queryset=Group.objects.only('id', 'name'))
     ).order_by('-date_joined')
@@ -160,6 +141,7 @@ def admin_dashboard(request):
     return render(request, 'admin/admin_dashboard.html', {'users': users})    
 @user_passes_test(is_admin,login_url='no_permission')    
 def assign_role(request, user_id):
+    User = get_user_model()
     user = User.objects.prefetch_related('groups').get(id=user_id)
     form = AssignRoleForm()
     if request.method == 'POST':
@@ -194,13 +176,35 @@ class ProfileView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        profile = getattr(user, 'profile', None)
+        # Profile fields are on the custom user model
         context['user'] = user
-        context['profile'] = profile
+        context['profile'] = {
+            'bio': getattr(user, 'bio', ''),
+            'profile_picture': getattr(user, 'profile_picture', None),
+        }
         context['username'] = user.username
         context['email'] = user.email
         context['name'] = user.get_full_name()
         # Add user roles (group names)
         context['roles'] = list(user.groups.values_list('name', flat=True))
         return context
-        return context
+
+from users.forms import EditProfileForm
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+
+@method_decorator(login_required, name='dispatch')
+class EditProfileView(TemplateView):
+    template_name = 'accounts/edit_profile.html'
+
+    def get(self, request, *args, **kwargs):
+        form = EditProfileForm(instance=request.user)
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = EditProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('profile')
+        return render(request, self.template_name, {'form': form})

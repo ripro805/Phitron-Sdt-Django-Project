@@ -2,10 +2,11 @@ from django.contrib.auth.models import Group
 import re
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django import forms
+from .models import CustomUser
 
 from tasks.forms import StyledFormMixin
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import Permission
 
 # Custom AuthenticationForm with styled widgets
 class StyledAuthenticationForm(AuthenticationForm):
@@ -22,7 +23,7 @@ class StyledAuthenticationForm(AuthenticationForm):
 
 class RegisterForm(UserCreationForm):
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['username','first_name','last_name','email','password1','password2']
     def __init__(self, *args, **kwargs):
         super(UserCreationForm,self).__init__(*args, **kwargs)
@@ -33,12 +34,12 @@ class CustomizeRegisterForm(StyledFormMixin, forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput)
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['username', 'first_name', 'last_name', 'email']
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
+        if CustomUser.objects.filter(email=email).exists():
             raise forms.ValidationError("This email is already registered. Please use a different email address.")
         return email
 
@@ -132,3 +133,10 @@ class CustomSetPasswordForm(SetPasswordForm):
             'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             'placeholder': 'Confirm new password',
         })
+
+# Using CustomUser fields directly for profile (bio, profile_picture)
+
+class EditProfileForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'first_name', 'last_name', 'bio', 'profile_picture']
