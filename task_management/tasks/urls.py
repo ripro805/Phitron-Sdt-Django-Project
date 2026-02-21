@@ -2,8 +2,10 @@ from django.urls import path
 from tasks.views import (
     ManagerDashboardView, EmployeeDashboardView, TestView, CreateTaskView, ViewTasksView, ViewTaskDetailView, UpdateTaskView, DeleteTaskView, GreetingView, HiGreetingView
 )
+from tasks.views_dashboard import dashboard_redirect
 
 urlpatterns = [
+    path('dashboard/', dashboard_redirect, name='dashboard'),
     path('manager-dashboard/', ManagerDashboardView.as_view(), name='manager_dashboard'),
     path('employee-dashboard/', EmployeeDashboardView.as_view(), name='employee_dashboard'),
     path('test/', TestView.as_view()),
