@@ -119,6 +119,15 @@ def group_list(request):
 
 class ProfileView(TemplateView):
     template_name = 'accounts/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        # If you have a custom profile model, fetch it here
+        profile = getattr(user, 'profile', None)
+        context['user'] = user
+        context['profile'] = profile
+        return context
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
