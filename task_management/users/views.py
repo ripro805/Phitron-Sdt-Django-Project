@@ -13,6 +13,9 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Prefetch
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView 
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 # Create your views here.
 
@@ -23,6 +26,22 @@ from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView,
 def is_admin(user):
     return user.groups.filter(name='Admin').exists() or user.is_superuser
 
+def send_activation_email(user, activation_link):
+    subject = 'Activate Your TaskPro Account'
+    html_content = render_to_string('accounts/activation_email.html', {
+        'activation_link': activation_link,
+        'year': 2026,
+    })
+    text_content = strip_tags(html_content)
+    email = EmailMultiAlternatives(
+        subject,
+        text_content,
+        'noreply@taskpro.com',
+        [user.email]
+    )
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+
 def sign_up(request):
     if request.method == 'GET':
         form = CustomizeRegisterForm()
@@ -32,6 +51,16 @@ def sign_up(request):
             user = form.save(commit=False)
             user.is_active = False
             user.save()
+            # Generate activation link
+            from django.contrib.sites.shortcuts import get_current_site
+            from django.urls import reverse
+            from django.utils.http import urlsafe_base64_encode
+            from django.utils.encoding import force_bytes
+            current_site = get_current_site(request)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            activation_link = f"http://{current_site.domain}{reverse('activate_account', args=[uid, token])}"
+            send_activation_email(user, activation_link)
             messages.success(request, "A confirmation email has been sent to your email address. Please activate your account.")
             return redirect('sign_in')
         else:
@@ -80,6 +109,7 @@ class CustomPasswordResetView(PasswordResetView):
     template_name = 'accounts/password_reset_form.html'
     form_class = CustomPasswordResetForm
     email_template_name = 'accounts/password_reset_email.html'
+    html_email_template_name = 'accounts/password_reset_email.html'
     subject_template_name = 'accounts/password_reset_subject.txt'
     success_url = '/users/password_reset/done/'
 
