@@ -2,6 +2,7 @@ from django.contrib.auth.models import Group
 import re
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django import forms
+from .models import UserProfile
 
 from tasks.forms import StyledFormMixin
 from django.contrib.auth.forms import UserCreationForm
@@ -132,3 +133,18 @@ class CustomSetPasswordForm(SetPasswordForm):
             'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             'placeholder': 'Confirm new password',
         })
+
+class EditProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['bio', 'profile_picture']
+        widgets = {
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Tell us about yourself...'}),
+            'profile_picture': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove broken self.userprofile logic; ModelForm handles instance
+
+    def save(self, commit=True):
+        return super().save(commit=commit)
