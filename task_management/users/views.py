@@ -12,9 +12,12 @@ from users.forms import StyledAuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Prefetch
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView 
 
 # Create your views here.
+
+# Class-based logout view
+  # Optional: customize logout page
 
 #test for user
 def is_admin(user):
@@ -52,6 +55,8 @@ class CustomLoginView(LoginView):
     def get_success_url(self):
         next_url=self.request.GET.get('next')
         return next_url if next_url else super().get_success_url()
+class CustomLogoutView(LogoutView):
+    next_page = "home"  # Redirect to home after logout
 @login_required           
 def sign_out(request):
     logout(request)
@@ -123,15 +128,13 @@ class ProfileView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        # If you have a custom profile model, fetch it here
         profile = getattr(user, 'profile', None)
         context['user'] = user
         context['profile'] = profile
-        return context
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
         context['username'] = user.username
         context['email'] = user.email
-        context['name']=user.get_full_name()
+        context['name'] = user.get_full_name()
+        # Add user roles (group names)
+        context['roles'] = list(user.groups.values_list('name', flat=True))
+        return context
         return context
