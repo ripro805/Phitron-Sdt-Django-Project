@@ -32,7 +32,21 @@
 		<div class="flex items-center gap-3">
 			<div class="relative group">
 				<button class="flex items-center focus:outline-none" id="user-menu-btn">
-					<img src="/static/images/banner/7463554.jpg" alt="User Avatar" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+					{% if user.profile_picture %}
+						<img src="{{ user.profile_picture.url }}" alt="User Avatar" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+					{% else %}
+						{% for group in user.groups.all %}
+							{% if group.name == "Admin" %}
+								<img src="/static/images/banner/admin_default.jpg" alt="Admin Avatar" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+							{% elif group.name == "Manager" %}
+								<img src="/static/images/banner/manager_default.jpg" alt="Manager Avatar" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+							{% elif group.name == "Employee" %}
+								<img src="/static/images/banner/employee_default.jpg" alt="Employee Avatar" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+							{% endif %}
+						{% empty %}
+							<img src="/static/images/banner/default.jpg" alt="Default Avatar" class="h-9 w-9 rounded-full border-2 border-cyan-400 shadow" />
+						{% endfor %}
+					{% endif %}
 					<svg class="ml-2 h-5 w-5 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
 				</button>
 				<div id="user-menu" class="hidden absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-100">
