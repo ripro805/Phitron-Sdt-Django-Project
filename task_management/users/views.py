@@ -3,7 +3,7 @@ from django.views.generic import TemplateView
 
 from django.shortcuts import render
 from django.contrib.auth.forms import UserCreationForm
-from users.forms import RegisterForm, CustomizeRegisterForm,LoginForm, AssignRoleForm,CreateGroupForm
+from users.forms import RegisterForm, CustomizeRegisterForm,LoginForm, AssignRoleForm,CreateGroupForm, CustomPasswordChangeForm, CustomPasswordResetForm, CustomSetPasswordForm
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login as auth_login , logout
 from django.shortcuts import redirect
@@ -12,7 +12,7 @@ from users.forms import StyledAuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Prefetch
-from django.contrib.auth.views import LoginView, LogoutView 
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView 
 
 # Create your views here.
 
@@ -57,6 +57,42 @@ class CustomLoginView(LoginView):
         return next_url if next_url else super().get_success_url()
 class CustomLogoutView(LogoutView):
     next_page = "home"  # Redirect to home after logout
+
+# Password change views
+class CustomPasswordChangeView(PasswordChangeView):
+    template_name = 'accounts/password_change_form.html'
+    success_url = '/users/password_change/done/'
+
+class CustomPasswordChangeDoneView(PasswordChangeDoneView):
+    template_name = 'accounts/password_change_done.html'
+
+# Password change views
+class CustomPasswordChangeView(PasswordChangeView):
+    template_name = 'accounts/password_change_form.html'
+    form_class = CustomPasswordChangeForm
+    success_url = '/users/password_change/done/'
+
+class CustomPasswordChangeDoneView(PasswordChangeDoneView):
+    template_name = 'accounts/password_change_done.html'
+
+# Password reset views
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'accounts/password_reset_form.html'
+    form_class = CustomPasswordResetForm
+    email_template_name = 'accounts/password_reset_email.html'
+    subject_template_name = 'accounts/password_reset_subject.txt'
+    success_url = '/users/password_reset/done/'
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'accounts/password_reset_done.html'
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'accounts/password_reset_confirm.html'
+    form_class = CustomSetPasswordForm
+    success_url = '/users/password_reset/complete/'
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'accounts/password_reset_complete.html'
 @login_required           
 def sign_out(request):
     logout(request)

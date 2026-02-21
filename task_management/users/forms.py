@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group
 import re
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django import forms
 
 from tasks.forms import StyledFormMixin
@@ -93,3 +93,42 @@ class CreateGroupForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model=Group
         fields=['name','permissions']
+
+# Password Change Form
+class CustomPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['old_password'].widget.attrs.update({
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'placeholder': 'Enter current password',
+        })
+        self.fields['new_password1'].widget.attrs.update({
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'placeholder': 'Enter new password',
+        })
+        self.fields['new_password2'].widget.attrs.update({
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'placeholder': 'Confirm new password',
+        })
+
+# Password Reset Form
+class CustomPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'placeholder': 'Enter your email address',
+        })
+
+# Set Password Form (for password reset confirm)
+class CustomSetPasswordForm(SetPasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['new_password1'].widget.attrs.update({
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'placeholder': 'Enter new password',
+        })
+        self.fields['new_password2'].widget.attrs.update({
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'placeholder': 'Confirm new password',
+        })

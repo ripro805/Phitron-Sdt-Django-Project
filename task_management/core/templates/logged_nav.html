@@ -23,8 +23,7 @@
 					<a href="{% url 'view_tasks' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">All Tasks</a>
 					<a href="{% url 'create-task' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">Create Task</a>
 				{% elif group.name == "Employee" %}
-					<a href="{% url 'view_tasks' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">My Tasks</a>
-					<a href="{% url 'employee_dashboard' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">My Dashboard</a>
+				<a href="{% url 'view_tasks' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">My Tasks</a>
 				{% endif %}
 			{% endfor %}
 			
@@ -90,8 +89,7 @@
 				<a href="{% url 'view_tasks' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">All Tasks</a>
 				<a href="{% url 'create-task' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Create Task</a>
 			{% elif group.name == "Employee" %}
-				<a href="{% url 'view_tasks' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">My Tasks</a>
-				<a href="{% url 'employee_dashboard' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">My Dashboard</a>
+			<a href="{% url 'view_tasks' %}" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">My Tasks</a>
 			{% endif %}
 		{% endfor %}
 		

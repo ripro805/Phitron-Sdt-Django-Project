@@ -66,6 +66,14 @@
                     </ul>
                 {% endif %}
             </div>
+            
+            <!-- Forgot Password Link -->
+            <div class="text-right">
+                <a href="{% url 'password_reset' %}" class="text-sm text-blue-600 hover:text-blue-800 hover:underline transition">
+                    Forgot your password?
+                </a>
+            </div>
+            
             <!-- Login Button -->
             <button type="submit" class="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg font-bold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2">
                 Sign In
