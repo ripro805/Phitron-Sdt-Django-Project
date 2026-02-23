@@ -5,8 +5,8 @@ from product.serializers import ProductSerializer
 
 class UserDropDownField(serializers.PrimaryKeyRelatedField):
     def get_queryset(self):
-        # Only users without a cart
-        return User.objects.filter(cart__isnull=True)
+        # Show all users in the dropdown
+        return User.objects.all()
     def display_value(self, instance):
         return instance.email
 
