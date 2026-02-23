@@ -9,9 +9,9 @@ from .models import Category, Product
 from .serializers import ProductSerializer, CategorySerializer
 from django.db.models import Count
 from rest_framework.views import APIView
+from rest_framework.mixins import ListModelMixin, CreateModelMixin
 
-
-class ProductListCreateView(APIView):
+class ViewProduct(APIView):
     def get(self, request):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True, context={'request': request})
@@ -48,7 +48,7 @@ class ProductDetailView(APIView):
         return Response(status=204)
     
 
-class CategoryListCreateView(APIView):
+class ViewCategory(APIView):
     def get(self, request):
         categories = Category.objects.annotate(product_count=Count('products')).all()
         serializer = CategorySerializer(categories, many=True)
@@ -61,6 +61,21 @@ class CategoryListCreateView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
+class ProductListView(ListModelMixin):
+    queryset=Product.objects.select_related('category').all()
+    serializer_class=ProductSerializer
+    
+    # def get_queryset(self):
+    #     return Product.objects.select_related('category').all()
+    # def get_serializer_class(self):
+    #     return ProductSerializer
+    
+    # def get_serializer_context(self):
+    #     return {'request': self.request}
+
+class CategoryListView(ListModelMixin):
+    queryset=Category.objects.annotate(product_count=Count('products')).all()
+    serializer_class=CategorySerializer
 
 class CategoryDetailView(APIView):
     def get_object(self, pk):
