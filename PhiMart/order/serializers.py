@@ -1,59 +1,90 @@
-from rest_framework import serializers
-from .models import Cart, CartItem, Order, OrderItem
-from users.models import User
-from product.serializers import ProductSerializer
-
-class UserDropDownField(serializers.PrimaryKeyRelatedField):
-    def get_queryset(self):
-        # Show all users in the dropdown
-        return User.objects.all()
-    def display_value(self, instance):
-        return instance.email
-
-
-
-    class Meta:
-        model = Cart
-        fields = ['id', 'user', 'items']
-    def validate_user(self, value):
-        if Cart.objects.filter(user=value).exists():
-            raise serializers.ValidationError("This user already has a cart.")
-        return value
-
-class CartItemSerializer(serializers.ModelSerializer):
-    product_price = serializers.SerializerMethodField()
+class AddCartItemSerializer(serializers.ModelSerializer):
+    product_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = CartItem
-        fields = ['id', 'cart', 'product_price', 'quantity']
+        fields = ['id', 'product_id', 'quantity']
 
-    def get_product_price(self, obj):
-        return obj.product.price if obj.product else None
+    def validate_product_id(self, value):
+        from product.models import Product
+        if not Product.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Invalid product_id")
+        return value
+
+    def create(self, validated_data):
+        from product.models import Product
+        product = Product.objects.get(id=validated_data['product_id'])
+        validated_data.pop('product_id')
+        return CartItem.objects.create(
+            product=product,
+            quantity=validated_data['quantity'],
+            cart=self.context['cart']
+        )
+
+from rest_framework import serializers
+from order.models import Cart, CartItem
+from product.models import Product
+from product.serializers import ProductSerializer
+
+class SimpleProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'price']
+
+class AddCartItemSerializer(serializers.ModelSerializer):
+    product_id = serializers.IntegerField()
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product_id', 'quantity']
+
+    def save(self, **kwargs):
+        cart_id = self.context['cart_id']
+        product_id = self.validated_data['product_id']
+        quantity = self.validated_data['quantity']
+
+        try:
+            cart_item = CartItem.objects.get(
+                cart_id=cart_id, product_id=product_id)
+            cart_item.quantity += quantity
+            cart_item.save()
+            self.instance = cart_item
+        except CartItem.DoesNotExist:
+            self.instance = CartItem.objects.create(
+                cart_id=cart_id, product_id=product_id, quantity=quantity)
+
+        return self.instance
+
+    def validate_product_id(self, value):
+        if not Product.objects.filter(pk=value).exists():
+            raise serializers.ValidationError(
+                f"Product with id {value} does not exists")
+        return value
+
+class UpdateCartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ['quantity']
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product = SimpleProductSerializer()
+    total_price = serializers.SerializerMethodField(method_name='get_total_price')
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product', 'quantity', 'total_price']
+
+    def get_total_price(self, cart_item: CartItem):
+        return cart_item.quantity * cart_item.product.price
+
 class CartSerializer(serializers.ModelSerializer):
-    user = UserDropDownField(queryset=User.objects.all())
     items = CartItemSerializer(many=True, read_only=True)
-    total_price = serializers.SerializerMethodField()
+    total_price = serializers.SerializerMethodField(method_name='get_total_price')
 
     class Meta:
         model = Cart
         fields = ['id', 'user', 'items', 'total_price']
 
-    def get_total_price(self, obj):
+    def get_total_price(self, cart: Cart):
         return sum(
-            (item.product.price if item.product else 0) * item.quantity
-            for item in obj.items.all()
-        )
-
-    def validate_user(self, value):
-        if Cart.objects.filter(user=value).exists():
-            raise serializers.ValidationError("This user already has a cart.")
-        return value
-class OrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = '__all__'
-
-class OrderItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderItem
-        fields = '__all__'
+            [item.product.price * item.quantity for item in cart.items.all()])

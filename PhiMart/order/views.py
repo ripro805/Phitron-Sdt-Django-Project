@@ -1,8 +1,8 @@
 from rest_framework import mixins, viewsets
 from order.models import Cart, CartItem, Order, OrderItem
-from order.serializers import CartSerializer, CartItemSerializer, OrderSerializer, OrderItemSerializer
+from order.serializers import AddCartItemSerializer, UpdateCartItemSerializer, CartItemSerializer, CartSerializer, OrderSerializer, OrderItemSerializer
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 
 
@@ -18,34 +18,40 @@ class CartViewSet(
     serializer_class = CartSerializer
 
 
-class CartItemViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet
-):
-    queryset = CartItem.objects.all()
-    serializer_class = CartItemSerializer
+class CartItemViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
-    def list(self, request, *args, **kwargs):
-        cart_pk = self.kwargs.get('cart_pk')
-        if cart_pk:
-            self.queryset = self.queryset.filter(cart_id=cart_pk)
-        return super().list(request, *args, **kwargs)
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateCartItemSerializer
+        return CartItemSerializer
 
-    def perform_create(self, serializer):
-        cart_pk = self.kwargs.get('cart_pk')
-        if cart_pk:
-            serializer.save(cart_id=cart_pk)
-        else:
-            serializer.save()
+    def get_serializer_context(self):
+        return {'cart_id': self.kwargs['cart_pk']}
+
+    def get_queryset(self):
+        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
 
 class OrderViewSet(CreateModelMixin):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
 class OrderItemViewSet(CreateModelMixin):
-    queryset = OrderItem.objects.all()
-    serializer_class = OrderItemSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_serializer_class(self):
+        from order.serializers import AddCartItemSerializer, UpdateCartItemSerializer, CartItemSerializer
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateCartItemSerializer
+        return CartItemSerializer
+
+    def get_serializer_context(self):
+        return {'cart_id': self.kwargs['cart_pk']}
+
+    def get_queryset(self):
+        from order.models import CartItem
+        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
