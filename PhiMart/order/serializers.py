@@ -1,30 +1,18 @@
-class AddCartItemSerializer(serializers.ModelSerializer):
-    product_id = serializers.IntegerField(write_only=True)
-
-    class Meta:
-        model = CartItem
-        fields = ['id', 'product_id', 'quantity']
-
-    def validate_product_id(self, value):
-        from product.models import Product
-        if not Product.objects.filter(id=value).exists():
-            raise serializers.ValidationError("Invalid product_id")
-        return value
-
-    def create(self, validated_data):
-        from product.models import Product
-        product = Product.objects.get(id=validated_data['product_id'])
-        validated_data.pop('product_id')
-        return CartItem.objects.create(
-            product=product,
-            quantity=validated_data['quantity'],
-            cart=self.context['cart']
-        )
 
 from rest_framework import serializers
-from order.models import Cart, CartItem
+from order.models import Cart, CartItem, Order, OrderItem
 from product.models import Product
 from product.serializers import ProductSerializer
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = '__all__'
 
 class SimpleProductSerializer(serializers.ModelSerializer):
     class Meta:
