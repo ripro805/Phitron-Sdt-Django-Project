@@ -1,8 +1,10 @@
 from django.db import models
+import uuid
 from users.models import User
 from product.models import Product
 
 class Cart(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
 	created_at = models.DateTimeField(auto_now_add=True)
 
@@ -13,6 +15,9 @@ class CartItem(models.Model):
 	cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
 	product = models.ForeignKey(Product, on_delete=models.CASCADE)
 	quantity = models.IntegerField()
+
+	class Meta:
+		unique_together = ('cart', 'product')  # Ensure one entry per product in the cart
 
 	def __str__(self):
 		return f"{self.quantity} x {self.product.name} in {self.cart.user.email}'s cart"
