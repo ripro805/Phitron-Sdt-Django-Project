@@ -30,3 +30,27 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def calculate_price_with_tax(self, product):
         return product.price * Decimal('1.1')  # Assuming 10% tax
+
+    def validate_price(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Price must be positive.")
+        return value
+
+    def validate_stock(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Stock cannot be negative.")
+        return value
+
+    def validate_name(self, value):
+        if not value:
+            raise serializers.ValidationError("Name cannot be empty.")
+        if len(value) < 3:
+            raise serializers.ValidationError("Name must be at least 3 characters.")
+        return value
+
+    # def validate(self, attrs):
+    #     price = attrs.get('price', 0)
+    #     stock = attrs.get('stock', 0)
+    #     if price > 10000 and stock > 100:
+    #         raise serializers.ValidationError("If price is very high, stock should not exceed 100.")
+    #     return attrs
