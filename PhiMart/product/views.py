@@ -1,29 +1,34 @@
 
    
-from django.shortcuts import render
-from django.http import HttpResponse
+
+
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Category
+from .models import Category, Product
 
 @api_view(['GET'])
 def view_products(request):
-    # For demonstration, we'll return a static list of products.
-    products = [
-        {"id": 1, "name": "Product A", "price": 10.99},
-        {"id": 2, "name": "Product B", "price": 15.99},
-        {"id": 3, "name": "Product C", "price": 7.99},
-    ]
-    return Response(products)
+    products =get_object_or_404(Product,pk=id)
+    product_dict = {
+        "id": products.id,
+        "name": products.name,
+        "description": products.description,
+        "price": products.price,
+        "stock": products.stock,
+    }
+    return Response({"product": product_dict})
+
 @api_view(['GET'])
 def view_categories(request):
-     categories = Category.objects.all()
-     data = [
+    categories = get_object_or_404(Category,pk=id)
+    data = [
         {
             "id": c.id,
             "name": c.name,
             "description": c.description,
         }
-        for c in categories
+        
     ]
-     return Response({"categories": data})
+    
+    return Response({"categories": data})
