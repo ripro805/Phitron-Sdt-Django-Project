@@ -1,61 +1,39 @@
-
-   
-
-
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Category, Product
-from .serializers import ProductSerializer, CategorySerializer
+from .models import Category, Product, Review
+from .serializers import ProductSerializer, CategorySerializer, ReviewSerializer
 from django.db.models import Count
-
-
-@api_view(['GET', 'POST'])
-def view_products(request):
-    if request.method == 'POST':
-        serializer = ProductSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-    else:
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True, context={'request': request})
-        return Response({"products": serializer.data})
-      
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def view_product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    if request.method == 'GET':
-        serializer = ProductSerializer(product, context={'request': request})
-        return Response({"product": serializer.data})
-    elif request.method == 'PUT':
-        serializer = ProductSerializer(product, data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
-    elif request.method == 'DELETE':
-        copy_of_product = Product.objects.get(pk=pk)  # Get a copy of the product before deletion
-        serializer=ProductSerializer(copy_of_product, context={'request': request})  # Serialize the copy
-        product.delete()
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.mixins import ListModelMixin, CreateModelMixin
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import ProductFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.pagination import PageNumberPagination
+from .paginations import DefaultPagination
+class ProductViewSet(ModelViewSet):
+    queryset = Product.objects.select_related('category').all()
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    # filterset_fields = ['category_id']
+    filterset_class = ProductFilter
+    search_fields = ['name', 'description','category__name']
+    ordering_fields = ['price', 'created_at']
+    pagination_class = DefaultPagination
+ 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
         return Response(status=204)
     
-@api_view(['GET', 'POST'])
-def view_categories(request):
-    if request.method == 'POST':
-        serializer = CategorySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-    categories = Category.objects.annotate(product_count=Count('products')).all()
-    serializer = CategorySerializer(categories, many=True)
-    return Response({"categories": serializer.data})
 
-@api_view(['GET'])
-def view_category_detail(request, pk):
-    category = get_object_or_404(Category, pk=pk)
-    serializer = CategorySerializer(category)
-    return Response({"category": serializer.data})
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.annotate(product_count=Count('products')).all()
+    serializer_class = CategorySerializer
+class ReviewViewSet(ModelViewSet):
+    serializer_class = ReviewSerializer
+    def get_query_set(self):
+        product_id = self.kwargs.get('product_pk')
+        return Review.objects.filter(product_id=product_id)
+    def get_serializer_context(self):
+        return {'product_id': self.kwargs.get('product_pk')}

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Category
+from .models import Product, Category, Review
 from decimal import Decimal
 
 # class ProductSerializer(serializers.Serializer):
@@ -69,3 +69,13 @@ class ProductSerializer(serializers.ModelSerializer):
     #         category=category
     #     )
     #     return product
+    
+
+class ReviewSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    class Meta:
+        model = Review
+        fields = ['id', 'product', 'name', 'description', 'date']
+        def create(self, validated_data):
+            product_id = self.context.get('product_id')
+            return Review.objects.create(product_id=product_id, **validated_data)
