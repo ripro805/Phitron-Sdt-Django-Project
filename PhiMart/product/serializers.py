@@ -13,9 +13,16 @@ from decimal import Decimal
 #     def calculate_price_with_tax(self, product):
 #         return product.price * Decimal('1.1')  # Assuming 10% tax
 
+class CategorySerializer(serializers.ModelSerializer):
+    product_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'description', 'product_count']
+
 class ProductSerializer(serializers.ModelSerializer):
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_price_with_tax')
-    category = serializers.HyperlinkedRelatedField(view_name='category-detail', read_only=True)  # Hyperlinked representation 
+    category = CategorySerializer(read_only=True)
 
     class Meta:
         model = Product
@@ -23,11 +30,3 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def calculate_price_with_tax(self, product):
         return product.price * Decimal('1.1')  # Assuming 10% tax
-    
-
-class CategorySerializer(serializers.ModelSerializer):
-    product_count = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = Category
-        fields = ['id', 'name', 'description', 'product_count']
