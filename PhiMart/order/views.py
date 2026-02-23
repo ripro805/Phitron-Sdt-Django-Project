@@ -17,7 +17,14 @@ class CartViewSet(
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
 
-class CartItemViewSet(CreateModelMixin):
+class CartItemViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
 
