@@ -1,4 +1,3 @@
-
 from django.urls import path, include
 from . import views
 from rest_framework.routers import DefaultRouter
@@ -22,7 +21,7 @@ products_router.register('reviews', ReviewViewSet, basename='product-reviews')
 
 
 urlpatterns = [
-    path('', views.api_home, name='api-home'),
+    path('', views.api_root_view, name='api-root'),
     path('', include(router.urls)),
     path('', include(products_router.urls)),
     path('', include(carts_router.urls)),
