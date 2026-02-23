@@ -1,6 +1,6 @@
 from django.urls import path, include
 from . import views
-from product.views import view_categories
+
 
 urlpatterns = [
     path('', views.api_home, name='api_home'),
