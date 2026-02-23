@@ -54,3 +54,18 @@ class ProductSerializer(serializers.ModelSerializer):
     #     if price > 10000 and stock > 100:
     #         raise serializers.ValidationError("If price is very high, stock should not exceed 100.")
     #     return attrs
+
+    # def create(self, validated_data):
+    #     category_id = self.initial_data.get('category')
+    #     category = None
+    #     if category_id:
+    #         category = Category.objects.get(pk=category_id)
+    #     product = Product.objects.create(
+    #         name=validated_data['name'],
+    #         description=validated_data.get('description', ''),
+    #         price=validated_data['price'],
+    #         stock=validated_data['stock'],
+    #         image=validated_data.get('image', None),
+    #         category=category
+    #     )
+    #     return product

@@ -24,11 +24,24 @@ def view_products(request):
         return Response({"products": serializer.data})
       
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT', 'DELETE'])
 def view_product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    serializer = ProductSerializer(product, context={'request': request})
-    return Response({"product": serializer.data})
+    if request.method == 'GET':
+        serializer = ProductSerializer(product, context={'request': request})
+        return Response({"product": serializer.data})
+    elif request.method == 'PUT':
+        serializer = ProductSerializer(product, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+    elif request.method == 'DELETE':
+        copy_of_product = Product.objects.get(pk=pk)  # Get a copy of the product before deletion
+        serializer=ProductSerializer(copy_of_product, context={'request': request})  # Serialize the copy
+        product.delete()
+        return Response(status=204)
+    
 @api_view(['GET', 'POST'])
 def view_categories(request):
     if request.method == 'POST':
