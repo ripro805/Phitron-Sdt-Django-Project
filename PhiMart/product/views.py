@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Category, Product
 from .serializers import ProductSerializer, CategorySerializer
+from django.db.models import Count
 @api_view()
 def view_products(request):
     products = Product.objects.all()
@@ -20,7 +21,7 @@ def view_product_detail(request, pk):
     return Response({"product": serializer.data})
 @api_view(['GET'])
 def view_categories(request):
-    categories = Category.objects.all()
+    categories = Category.objects.annotate(product_count=Count('products')).all()
     serializer = CategorySerializer(categories, many=True)
     return Response({"categories": serializer.data})
 
