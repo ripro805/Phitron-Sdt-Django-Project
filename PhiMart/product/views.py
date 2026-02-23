@@ -9,6 +9,8 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView, C
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProductFilter
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.pagination import PageNumberPagination
+from .paginations import DefaultPagination
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.select_related('category').all()
     serializer_class = ProductSerializer
@@ -17,6 +19,7 @@ class ProductViewSet(ModelViewSet):
     filterset_class = ProductFilter
     search_fields = ['name', 'description','category__name']
     ordering_fields = ['price', 'created_at']
+    pagination_class = DefaultPagination
  
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
