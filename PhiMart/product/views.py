@@ -21,7 +21,7 @@ def view_products(request):
 
 @api_view(['GET'])
 def view_categories(request):
-    categories = get_object_or_404(Category,pk=id)
+    c = get_object_or_404(Category,pk=id)
     data = [
         {
             "id": c.id,
