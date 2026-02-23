@@ -10,24 +10,22 @@ from .serializers import ProductSerializer, CategorySerializer
 @api_view()
 def view_products(request):
     products = Product.objects.all()
-    serializer = ProductSerializer(products, many=True)
+    serializer = ProductSerializer(products, many=True, context={'request': request})
     return Response({"products": serializer.data})
 
 @api_view(['GET'])
 def view_product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    serializer = ProductSerializer(product)
+    serializer = ProductSerializer(product, context={'request': request})
     return Response({"product": serializer.data})
 @api_view(['GET'])
 def view_categories(request):
-    c = get_object_or_404(Category,pk=id)
-    data = [
-        {
-            "id": c.id,
-            "name": c.name,
-            "description": c.description,
-        }
-        
-    ]
-    
-    return Response({"categories": data})
+    categories = Category.objects.all()
+    serializer = CategorySerializer(categories, many=True)
+    return Response({"categories": serializer.data})
+
+@api_view(['GET'])
+def view_category_detail(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    serializer = CategorySerializer(category)
+    return Response({"category": serializer.data})
