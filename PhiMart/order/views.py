@@ -4,7 +4,7 @@ from order.serializers import AddCartItemSerializer, UpdateCartItemSerializer, C
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-
+from rest_framework.permissions import IsAuthenticated
 
 class CartViewSet(
     mixins.CreateModelMixin,
@@ -14,8 +14,12 @@ class CartViewSet(
     mixins.ListModelMixin,  # Enables GET /api/carts/
     viewsets.GenericViewSet
 ):
-    queryset = Cart.objects.all()
+    
     serializer_class = CartSerializer
+    permission_classes=[IsAuthenticated]
+    
+    def get_queryset(self):
+        return Cart.objects.filter(user=self.request.user)
 
 
 class CartItemViewSet(ModelViewSet):
@@ -34,11 +38,16 @@ class CartItemViewSet(ModelViewSet):
     def get_queryset(self):
         return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
 
-class OrderViewSet(CreateModelMixin):
-    queryset = Order.objects.all()
+class OrderViewSet(viewsets.ModelViewSet):
+    # queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+       if self.request.user.is_staff:
+           return Order.objects.select_related('product').all()
+       return Order.objects.select_related('product').filter(user=self.request.user)
 
-class OrderItemViewSet(CreateModelMixin):
+class OrderItemViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):

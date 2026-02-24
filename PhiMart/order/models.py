@@ -14,7 +14,7 @@ class Cart(models.Model):
 class CartItem(models.Model):
 	cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
 	product = models.ForeignKey(Product, on_delete=models.CASCADE)
-	quantity = models.IntegerField()
+	quantity = models.PositiveIntegerField(default=1)
 
 	class Meta:
 		unique_together = ('cart', 'product')  # Ensure one entry per product in the cart
@@ -25,13 +25,22 @@ class CartItem(models.Model):
 
 # Order and OrderItem models
 class Order(models.Model):
+	NOT_PAID = 'NOT PAID'
+	READY_TO_SHIP = 'READY TO SHIP'
+	SHIPPED = 'SHIPPED'
+	DELIVERED = 'DELIVERED'
+	CANCELLED = 'CANCELLED'
+
 	STATUS_CHOICES = [
-		('PENDING', 'Pending'),
-		('SHIPPED', 'Shipped'),
-		('DELIVERED', 'Delivered'),
+		(NOT_PAID, 'Not Paid'),
+		(READY_TO_SHIP, 'Ready to Ship'),
+		(SHIPPED, 'Shipped'),
+		(DELIVERED, 'Delivered'),
+		(CANCELLED, 'Cancelled'),
 	]
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
-	status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+	status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=NOT_PAID)
 	total_price = models.DecimalField(max_digits=10, decimal_places=2)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -42,7 +51,7 @@ class Order(models.Model):
 class OrderItem(models.Model):
 	order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
 	product = models.ForeignKey(Product, on_delete=models.CASCADE)
-	quantity = models.IntegerField()
+	quantity = models.PositiveIntegerField(default=1)
 	price = models.DecimalField(max_digits=10, decimal_places=2)
 
 	def __str__(self):
