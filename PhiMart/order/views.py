@@ -57,16 +57,18 @@ class OrderViewSet(ModelViewSet):
         return Response({'status': f"Order status updated to {request.data['status']}"})
 
     def get_permissions(self):
-        if self.action in ['update_status', 'destroy']:
+        # Only admin can update status, perform updates, or delete orders
+        if self.action in ['update_status', 'destroy', 'update', 'partial_update']:
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
     def get_serializer_class(self):
+        # Use limited serializer for status updates and admin update actions
         if self.action == 'cancel':
             return orderSz.EmptySerializer
         if self.action == 'create':
             return orderSz.CreateOrderSerializer
-        elif self.action == 'update_status':
+        if self.action in ['update_status', 'update', 'partial_update']:
             return orderSz.UpdateOrderSerializer
         return orderSz.OrderSerializer
 
