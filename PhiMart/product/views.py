@@ -11,6 +11,8 @@ from .filters import ProductFilter
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from .paginations import DefaultPagination
+from api.permissions import IsAdminOrReadOnly
+
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.select_related('category').all()
     serializer_class = ProductSerializer
@@ -20,6 +22,11 @@ class ProductViewSet(ModelViewSet):
     search_fields = ['name', 'description','category__name']
     ordering_fields = ['price', 'created_at']
     pagination_class = DefaultPagination
+    permission_classes = [IsAdminOrReadOnly]
+    # def get_permissions(self):
+    #     if self.request.method == 'GET':
+    #         return [AllowAny()]
+    #     return [IsAdminUser()]
  
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -30,6 +37,11 @@ class ProductViewSet(ModelViewSet):
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.annotate(product_count=Count('products')).all()
     serializer_class = CategorySerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'description']
+    ordering_fields = ['name']
+    pagination_class = DefaultPagination
+    permission_classes = [IsAdminOrReadOnly]
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer
     def get_query_set(self):
