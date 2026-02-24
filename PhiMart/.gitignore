@@ -1,9 +1,12 @@
-db.sqlite3
-__pycache__/
+# Python
 *.pyc
-media/
-uploads/
-*.log
-env/
-.env
+__pycache__/
+# Django
+*.sqlite3
+# VS Code
 .vscode/
+# Environment
+.env
+.venv/
+# Misc
+*.log
