@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Product, Category, Review
 from decimal import Decimal
 
+
 # class ProductSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)
 #     name = serializers.CharField(max_length=200)
@@ -72,10 +73,24 @@ class ProductSerializer(serializers.ModelSerializer):
     
 
 class ReviewSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    # user = SimpleUserSerializer()
+    user = serializers.SerializerMethodField(method_name='get_user')
+
     class Meta:
         model = Review
-        fields = ['id', 'product', 'name', 'description', 'date']
-        def create(self, validated_data):
-            product_id = self.context.get('product_id')
-            return Review.objects.create(product_id=product_id, **validated_data)
+        fields = ['id', 'user', 'product', 'ratings', 'comment']
+        read_only_fields = ['user', 'product']
+
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'first_name': obj.user.first_name,
+            'last_name': obj.user.last_name,
+            'email': obj.user.email,
+            'address': obj.user.address,
+            'phone_number': obj.user.phone_number,
+        }
+
+    def create(self, validated_data):
+        product_id = self.context['product_id']
+        return Review.objects.create(product_id=product_id, **validated_data)
