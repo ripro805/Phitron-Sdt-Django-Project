@@ -38,8 +38,8 @@ class Order(models.Model):
 		(DELIVERED, 'Delivered'),
 		(CANCELLED, 'Cancelled'),
 	]
-	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+	# id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='order')
 	status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=NOT_PAID)
 	total_price = models.DecimalField(max_digits=10, decimal_places=2)
 	created_at = models.DateTimeField(auto_now_add=True)
