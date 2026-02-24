@@ -24,8 +24,9 @@ from .views import api_root_view
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', api_root_view, name='api-root'),
-    path('api-auth/', include('rest_framework.urls')),
-    path('api/', include('api.urls'), name='api-root'),
+   # path('api-auth/', include('rest_framework.urls')),
+    path('api/', include('api.urls')),
+    
 ]
 
 if settings.DEBUG:

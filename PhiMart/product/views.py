@@ -11,6 +11,9 @@ from .filters import ProductFilter
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from .paginations import DefaultPagination
+from api.permissions import IsAdminOrReadOnly
+from .permissions import IsReviewAuthorOrReadonly
+
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.select_related('category').all()
     serializer_class = ProductSerializer
@@ -20,6 +23,11 @@ class ProductViewSet(ModelViewSet):
     search_fields = ['name', 'description','category__name']
     ordering_fields = ['price', 'created_at']
     pagination_class = DefaultPagination
+    permission_classes = [IsAdminOrReadOnly]
+    # def get_permissions(self):
+    #     if self.request.method == 'GET':
+    #         return [AllowAny()]
+    #     return [IsAdminUser()]
  
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -30,10 +38,24 @@ class ProductViewSet(ModelViewSet):
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.annotate(product_count=Count('products')).all()
     serializer_class = CategorySerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'description']
+    ordering_fields = ['name']
+    pagination_class = DefaultPagination
+    permission_classes = [IsAdminOrReadOnly]
+
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer
-    def get_query_set(self):
-        product_id = self.kwargs.get('product_pk')
-        return Review.objects.filter(product_id=product_id)
+    permission_classes = [IsReviewAuthorOrReadonly]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        return Review.objects.filter(product_id=self.kwargs['product_pk'])
+
     def get_serializer_context(self):
-        return {'product_id': self.kwargs.get('product_pk')}
+        return {'product_id': self.kwargs['product_pk']}
