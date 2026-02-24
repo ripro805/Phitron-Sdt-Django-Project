@@ -73,8 +73,8 @@ class ProductSerializer(serializers.ModelSerializer):
     
 
 class ReviewSerializer(serializers.ModelSerializer):
-    # user = SimpleUserSerializer()
     user = serializers.SerializerMethodField(method_name='get_user')
+    product = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Review
